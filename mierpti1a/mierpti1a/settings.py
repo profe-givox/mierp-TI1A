@@ -66,7 +66,7 @@ TEMPLATES = [
             ],
         },
     },
-]
+]   
 
 WSGI_APPLICATION = 'mierpti1a.wsgi.application'
 

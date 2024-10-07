@@ -8,6 +8,9 @@
     {% for order in orders %}
       <li>
         <a href="{% url 'order_detail' order.id %}">Pedido #{{ order.id }} - {{ order.product }}</a>
+        <br>
+        <!-- Enlace para ver la ruta de cada pedido -->
+        <a href="{% url 'route_detail' order.id %}" style="color: green; text-decoration: underline;">Ver ruta de entrega</a>
       </li>
     {% endfor %}
   </ul>
