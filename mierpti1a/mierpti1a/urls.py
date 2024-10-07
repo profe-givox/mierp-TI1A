@@ -25,4 +25,6 @@ urlpatterns = [
     path('ecar', include('ecar.urls')), 
     path('payments' , include('payments.urls')),
     path('shipments', include('shipments.urls')),
+    path('inventory/', include('inventory.urls')),
+
 ]
