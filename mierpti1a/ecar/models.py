@@ -57,4 +57,3 @@ class Pedido(models.Model):
 
     def __str__(self):
         return f"Pedido {self.id} - Estado: {self.get_estado_display()}"
-
