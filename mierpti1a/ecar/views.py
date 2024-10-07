@@ -46,32 +46,32 @@ def carrito(request):
     if request.user.is_authenticated:
         carrito, created = Carrito.objects.get_or_create(usuario=request.user)
         productos_carrito = CarritoProducto.objects.filter(carrito=carrito)
+
+        # Calcular el total del carrito
+        total = sum(item.producto.precio * item.cantidad for item in productos_carrito)
     else:
         productos_carrito = []
-    return render(request, 'ecar/carrito.html', {'productos_carrito': productos_carrito})
+        total = 0  # Si no hay productos o no está autenticado
+
+    return render(request, 'ecar/carrito.html', {
+        'productos_carrito': productos_carrito,
+        'total': total
+    })
 
 
-
-@api_view(['POST'])
 def agregar_al_carrito(request):
-    usuario = request.user
-    if not usuario.is_authenticated:
-        return Response({'error': 'Usuario no autenticado'}, status=status.HTTP_401_UNAUTHORIZED)
+    # Obtener el producto y cantidad de la solicitud POST
+    producto_id = request.POST.get('producto_id')
+    cantidad = int(request.POST.get('cantidad', 1))  # Si no se especifica, la cantidad es 1
 
-    producto_id = request.data.get('producto')
-    cantidad = request.data.get('cantidad', 1)
+    # Obtener el producto o devolver un error 404 si no existe
+    producto = get_object_or_404(Producto, id=producto_id)
 
-    try:
-        producto = Producto.objects.get(id=producto_id)
-        carrito, created = Carrito.objects.get_or_create(usuario=usuario)
+    # Obtener o crear el carrito del usuario autenticado
+    carrito, created = Carrito.objects.get_or_create(usuario=request.user)
 
-        # Agregar o actualizar la cantidad del producto en el carrito
-        carrito_producto, created = CarritoProducto.objects.get_or_create(carrito=carrito, producto=producto)
+    # Usar el método agregar_producto del carrito
+    carrito.agregar_producto(producto, cantidad)
 
-        # Si el producto ya estaba en el carrito, actualiza la cantidad
-        carrito_producto.cantidad += cantidad
-        carrito_producto.save()
-
-        return Response({'mensaje': 'Producto agregado al carrito'}, status=status.HTTP_200_OK)
-    except Producto.DoesNotExist:
-        return Response({'error': 'Producto no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    # Responder con un JSON indicando que todo salió bien
+    return JsonResponse({'message': 'Producto agregado al carrito correctamente', 'producto_id': producto.id, 'cantidad': cantidad})

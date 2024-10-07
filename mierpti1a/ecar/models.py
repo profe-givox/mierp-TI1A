@@ -12,7 +12,6 @@ class Producto(models.Model):
     def __str__(self):
         return self.nombre
 
-# Modelo de Carrito
 class Carrito(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     productos = models.ManyToManyField(Producto, through='CarritoProducto')
@@ -20,6 +19,23 @@ class Carrito(models.Model):
     def __str__(self):
         return f"Carrito de {self.usuario.username}"
 
+    def agregar_producto(self, producto, cantidad=1):
+        carrito_producto, created = CarritoProducto.objects.get_or_create(
+            carrito=self, 
+            producto=producto
+        )
+        if not created:
+            carrito_producto.cantidad += cantidad
+        else:
+            carrito_producto.cantidad = cantidad
+        carrito_producto.save()
+
+    def calcular_total(self):
+        total = 0
+        for item in self.carritoproducto_set.all():
+            total += item.producto.precio * item.cantidad
+        return total
+    
 # Modelo de relación entre Carrito y Producto (Cantidad)
 class CarritoProducto(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
