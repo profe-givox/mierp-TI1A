@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles/disputas.css' %}">
+    <title>Módulo de Gestión de Disputas de Pagos</title>
+
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gestión de Disputas de Pagos</h1>
+
+        <!-- Tabla para ver resumen de disputas existentes -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Disputa</th>
+                    <th>Cliente</th>
+                    <th>Monto en disputa</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>001</td>
+                    <td>Juan Pérez</td>
+                    <td>$500.00</td>
+                    <td>En Proceso</td>
+                    <td>
+                        <button>Actualizar Estado</button>
+                        <button>Resolver</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>002</td>
+                    <td>María López</td>
+                    <td>$1200.00</td>
+                    <td>Pendiente</td>
+                    <td>
+                        <button>Actualizar Estado</button>
+                        <button>Resolver</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Formulario para iniciar una nueva disputa -->
+        <div class="form-section">
+            <h2>Iniciar Nueva Disputa</h2>
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label for="cliente">Nombre del Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="monto">Monto en Disputa:</label>
+                    <input type="number" id="monto" name="monto" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción de la Disputa:</label>
+                    <textarea id="descripcion" name="descripcion" required></textarea>
+                </div>
+
+                <button type="submit">Enviar Disputa</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
