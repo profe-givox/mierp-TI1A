@@ -8,3 +8,6 @@ urlpatterns = [
     path('orders/<int:pk>/', order_detail, name='order_detail'),
     path('orders/<int:pk>/route/', route_detail, name='route_detail'),  # Confirmar que esta ruta esté definida
 ]
+
+urlpatterns = [
+]
