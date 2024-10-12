@@ -58,3 +58,51 @@ class Empleado(models.Model):
 
     def __str__(self):
         return f'{self.nombre} {self.apellidos} - {self.puesto}'
+    
+class Nomina(models.Model):
+    codigo = models.CharField(primary_key=True, max_length=6)
+    folioEmpleado = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='nomina_folioEmpleado')
+    nombre = models.ForeignKey(Empleado, on_delete=models.CASCADE, related_name='nomina_nombre')
+    departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE)
+    puesto = models.ForeignKey(Puesto, on_delete=models.CASCADE)
+    fecha_pago = models.DateField("Fecha de pago")
+    salario_diario = models.DecimalField("Salario diario", max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+    dias_trabajados = models.IntegerField()  # Máximo depende de la aplicación
+    dias_pagados = models.IntegerField()  # Máximo depende de la aplicación
+    fecha_inicial = models.DateField("Fecha de inicio")
+    fecha_final = models.DateField("Fecha final")
+    TIPO_NOMINA = [
+        ('S', 'Semanal'),
+        ('Q', 'Quincenal'),
+        ('M', 'Mensual'),
+        ('A', 'Anual'),
+        ('AG', 'Aguinaldo'),
+        ('O', 'Ordinario'),
+        ('F', 'Finiquito')
+    ]
+    tiponomina = models.CharField(max_length=2, choices=TIPO_NOMINA)  # Se ajusta a 2 ya que algunos valores tienen más de un carácter
+    descontar_ahorro = models.BooleanField()
+    monto_DA = models.DecimalField(max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+    descontar_prestamo = models.BooleanField()
+    monto_DP = models.DecimalField(max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+    total_percepciones = models.DecimalField(max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+    deducciones = models.DecimalField(max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+    subtotal = models.DecimalField("Subtotal", max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+    salario_final = models.DecimalField("Total", max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+
+class Percepciones(models.Model):
+    codigo = models.CharField(primary_key=True, max_length=3)
+    nombre = models.CharField(max_length=100)  # Se agregó el atributo max_length
+    monto = models.DecimalField(max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
+
+class Salida_Entrada(models.Model):
+    codigo_empleado = models.CharField(primary_key=True, max_length=5)
+    hora = models.DateTimeField()
+    ENTRADA_SALIDA = [
+        ('E', 'Entrada'),
+        ('S', 'Salida')
+    ]
+    opcion = models.CharField(max_length=1, choices=ENTRADA_SALIDA)
+
+
+

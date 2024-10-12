@@ -1,101 +1,89 @@
 .main-content {
-    width: 50%;
-    border-radius: 20px;
-    box-shadow: 0 5px 5px rgba(0,0,0,.4);
-    margin: 5em auto;
-    display: flex;
+    width: 25%; /* Ajusta el ancho */
+    height: 30%; /* Ajusta la altura para que sea cuadrado */
+    border-radius: 20px; /* Bordes completamente redondeados */
+    box-shadow: 0 8px 15px rgba(0,0,0,.3); /* Sombra más suave y sutil */
+    margin: 2em auto; /* Margen centrado */
+    background-color: #4CAF50; /* Color verde más atractivo */
+    padding: 2em; /* Padding para un diseño más limpio */
+    position: relative; /* Posicionamiento relativo para mayor control */
 }
 
 .company__info {
-    background-color: #008080;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    color: #fff;
-}
-
-.fa-android {
-    font-size: 3em;
-}
-
-@media screen and (max-width: 640px) {
-    .main-content { width: 90%; }
-    .company__info { display: none; }
-    .login_form {
-        border-top-left-radius: 20px;
-        border-bottom-left-radius: 20px;
-    }
-}
-
-@media screen and (min-width: 642px) and (max-width: 800px) {
-    .main-content { width: 70%; }
-}
-
-.row > h2 {
-    color: #008080;
-    text-align: center; /* Centra el título */
+    display: none; /* Mantiene oculta la sección de información de la compañía */
 }
 
 .login_form {
     background-color: #fff;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    border-top: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    flex: 1;
+    border-radius: 20px; /* Bordes completamente redondeados */
+    border: 1px solid #ccc;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 1.5em; /* Padding más pequeño para ajustarse al tamaño reducido */
+    height: 100%; /* Asegura que el formulario ocupe toda la altura del contenedor */
 }
 
 form {
-    padding: 0 2em;
-    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center; /* Centra los elementos del formulario */
+    align-items: center;
 }
 
 .form__input {
     width: 100%;
-    border: 0px solid transparent;
-    border-radius: 0;
-    border-bottom: 1px solid #aaa;
-    padding: 1em .5em .5em;
-    padding-left: 2em;
+    border: 1px solid #aaa;
+    border-radius: 50px; /* Bordes redondeados completos */
+    padding: 0.75em 1.5em; /* Espacio interno ajustado */
+    margin: 1em 0;
     outline: none;
-    margin: 1.5em auto;
-    transition: all .5s ease;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .form__input:focus {
-    border-bottom-color: #008080;
-    box-shadow: 0 0 5px rgba(0,80,80,.4); 
-    border-radius: 4px;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(0,80,80,0.5); 
+}
+
+.form__input::before {
+    content: attr(data-icon);
+    font-family: FontAwesome;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2em;
+    color: #aaa;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .btn {
-    transition: all .5s ease;
-    width: 100%;
-    border-radius: 30px;
-    color: #008080;
-    font-weight: 600;
-    background-color: #fff;
-    border: 1px solid #008080;
-    margin-top: 1.5em;
-    margin-bottom: 1em;
-    text-align: center; 
+    width: 48%; /* Ajusta el ancho para que los botones quepan juntos */
+    border-radius: 50px; /* Bordes completamente redondeados */
+    color: #fff;
+    background: linear-gradient(to right, #4CAF50, #81C784); /* Color degradado */
+    border: none;
+    padding: 1em;
+    margin: 1em 0;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .btn:hover, .btn:focus {
-    background-color: #008080;
-    color: #fff;
+    background: linear-gradient(to right, #388E3C, #66BB6A); /* Color degradado al pasar el ratón */
 }
 
-.company-logo {
-    width: 200px;
-    height: auto;
+h2 {
+    color: #fff;
+    margin-bottom: 1.5em;
+    font-size: 1.8em;
 }
+
