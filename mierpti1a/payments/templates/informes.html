@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles/informes.css' %}">
+    <title>Módulo de Informes y Análisis de Pagos</title>
+
+</head>
+<body>
+
+    <div class="container">
+        <h1>Informes y Análisis de Pagos</h1>
+
+        <!-- Filtros para generar el informe -->
+        <div class="filters">
+            <div>
+                <label for="fecha_inicio">Fecha de inicio:</label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio">
+            </div>
+            <div>
+                <label for="fecha_fin">Fecha de fin:</label>
+                <input type="date" id="fecha_fin" name="fecha_fin">
+            </div>
+            <div>
+                <label for="estado_pago">Estado de pago:</label>
+                <select id="estado_pago" name="estado_pago">
+                    <option value="todos">Todos</option>
+                    <option value="pagado">Pagado</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="fallido">Fallido</option>
+                </select>
+            </div>
+            <div>
+                <button onclick="generarInforme()">Generar Informe</button>
+            </div>
+        </div>
+
+        
+        <div class="chart-container">
+            <h2>Gráfico de Pagos</h2>
+            <img src="https://www.slideteam.net/wp/wp-content/uploads/2023/04/Grafico-de-proyecciones-de-ingresos-por-ventas-anuales.png"  width="460"
+            height="350"/>
+        </div>
+
+        <!-- Resumen de informe en formato de tabla -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>01/10/2024</td>
+                    <td>Juan Pérez</td>
+                    <td>$500.00</td>
+                    <td>Pagado</td>
+                </tr>
+                <tr>
+                    <td>02/10/2024</td>
+                    <td>María López</td>
+                    <td>$1200.00</td>
+                    <td>Pendiente</td>
+                </tr>
+                <tr>
+                    <td>03/10/2024</td>
+                    <td>Pedro Ramírez</td>
+                    <td>$750.00</td>
+                    <td>Fallido</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+ 
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+}
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 70px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+.container h2 {
+    text-align: center;
+}
+.payment-methods {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.payment-methods button {
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.payment-methods .active {
+    background-color: #f9b233;
+    color: white;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.submit-button {
+    text-align: center;
+}
+.submit-button button {
+    padding: 10px 20px;
+    background-color: #00c7b7;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.guarantee {
+    text-align: center;
+    margin-top: 15px;
+    color: green;
+    font-size: 14px;
+}
+.secure {
+    text-align: center;
+    margin-bottom: 20px;
+}
