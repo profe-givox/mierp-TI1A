@@ -1,0 +1,103 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    width: 650px;
+    background-color: white;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+
+.tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    background-color: #f0f0f0;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.tabs button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #e0e0e0;
+    color: black;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 1.3rem;
+}
+
+.tabs button.active {
+    background-color: #5c6bc0;
+    color: white;
+}
+
+.tabs button:hover {
+    background-color: #3949ab;
+    color: white;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+
+.form-field label {
+    font-size: 1.4rem;
+    width: 30%;
+    text-align: left;
+}
+
+.form-field input {
+    width: 65%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    background-color: #d9d9d9;
+}
+
+.form-field input[disabled] {
+    background-color: #ccc; 
+    color: #000; 
+}
+
+.btn-submit {
+    width: 45%;
+    padding: 0.8rem;
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    margin: 1.5rem auto 0 auto;
+    display: block;
+}
+
+.btn-submit:hover {
+    background-color: #3949ab;
+}

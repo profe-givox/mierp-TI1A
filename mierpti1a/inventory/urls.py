@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import CustomLoginView, product_form, editar_producto, eliminar_producto, ventas, pedidos, nuevo_pedido
 from .views import editar_pedido, eliminar_pedido, ver_productos
+from . import views
 
 urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
@@ -13,6 +14,10 @@ urlpatterns = [
     path('pedido/editar/', editar_pedido, name='editar_pedido'), 
     path('pedido/eliminar/', eliminar_pedido, name='eliminar_pedido'),
     path('productos/', ver_productos, name='ver_productos'),
-    # Aquí podrías incluir rutas adicionales si es necesario
-    # path('api/', include('rest_framework.urls')), 
+
+    # API endpoints
+    path('api/productos/', views.listar_productos, name='listar_productos'),
+    path('api/productos/nuevo/', views.crear_producto, name='crear_producto'),
+    path('api/productos/<int:producto_id>/actualizar/', views.actualizar_producto, name='actualizar_producto'),
+    path('api/productos/<int:producto_id>/eliminar/', views.eliminar_producto_api, name='eliminar_producto_api'),  # Cambiado el nombre aquí
 ]
