@@ -20,4 +20,10 @@ urlpatterns = [
     path('api/productos/nuevo/', views.crear_producto, name='crear_producto'),
     path('api/productos/<int:producto_id>/actualizar/', views.actualizar_producto, name='actualizar_producto'),
     path('api/productos/<int:producto_id>/eliminar/', views.eliminar_producto_api, name='eliminar_producto_api'),  # Cambiado el nombre aquí
+
+
+    path('buscar_producto/', views.buscar_producto, name='buscar_producto'),
+    
+
+    
 ]

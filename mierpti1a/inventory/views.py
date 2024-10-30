@@ -16,7 +16,9 @@ def product_form(request):
     return render(request, 'inventory/product_form.html')
 
 def editar_producto(request):
-    return render(request, 'inventory/editar_producto.html')
+    almacenes = Almacen.objects.all() 
+    return render(request, 'inventory/editar_producto.html', {'almacenes': almacenes})
+
 
 def eliminar_producto(request):
     return render(request, 'inventory/eliminar_producto.html')
@@ -42,6 +44,39 @@ def ver_productos(request):
 # API CRUD para Productos
 
 from django.db.models import Prefetch
+
+from django.http import JsonResponse
+from django.db.models import Q
+from .models import Producto
+
+def buscar_producto(request):
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        producto = Producto.objects.filter(
+            Q(codigo_producto__icontains=search_query) | Q(nombre_producto__icontains=search_query)
+        ).first()
+
+        if producto:
+            data = {
+                'id': producto.id,  # Añadir el ID del producto aquí
+                'codigo_producto': producto.codigo_producto,
+                'nombre_producto': producto.nombre_producto,
+                'proveedor': producto.proveedor,
+                'categoria': producto.categoria,
+                'cantidad_por_unidad': producto.cantidad_por_unidad,
+                'precio_unitario': str(producto.precio_unitario),
+                'unidades_en_existencia': producto.unidades_en_existencia,
+                'unidades_en_pedido': producto.unidades_en_pedido,
+                'nivel_reorden': producto.nivel_reorden,
+                'almacen': producto.ubicacionproducto_set.first().almacen.nombre if producto.ubicacionproducto_set.exists() else '',
+                'estante': producto.ubicacionproducto_set.first().estante if producto.ubicacionproducto_set.exists() else '',
+                'lugar': producto.ubicacionproducto_set.first().lugar if producto.ubicacionproducto_set.exists() else ''
+            }
+            return JsonResponse({'producto': data})
+        else:
+            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+    else:
+        return JsonResponse({'error': 'No se proporcionó un término de búsqueda'}, status=400)
 
 # Listar productos con opción de búsqueda
 def listar_productos(request):
@@ -141,13 +176,15 @@ def crear_producto(request):
 
 
 
-# Actualizar producto
+
 @csrf_exempt
 def actualizar_producto(request, producto_id):
     if request.method == 'PUT':
         try:
             data = json.loads(request.body)
             producto = get_object_or_404(Producto, id=producto_id)
+            
+            # Actualizar campos del producto
             producto.codigo_producto = data.get('codigo_producto', producto.codigo_producto)
             producto.nombre_producto = data.get('nombre', producto.nombre_producto)
             producto.proveedor = data.get('proveedor', producto.proveedor)
@@ -158,13 +195,34 @@ def actualizar_producto(request, producto_id):
             producto.unidades_en_pedido = data.get('unidades_en_pedido', producto.unidades_en_pedido)
             producto.nivel_reorden = data.get('nivel_reorden', producto.nivel_reorden)
             producto.save()
-            return JsonResponse({'mensaje': 'Producto actualizado exitosamente'})
+
+            # Actualizar ubicación del producto
+            almacen_id = data.get('almacen')
+            estante = data.get('estante')
+            lugar = data.get('lugar')
+
+            if almacen_id:
+                almacen = get_object_or_404(Almacen, id=almacen_id)
+                ubicacion_producto, created = UbicacionProducto.objects.update_or_create(
+                    producto=producto,
+                    defaults={
+                        'almacen': almacen,
+                        'estante': estante,
+                        'lugar': lugar
+                    }
+                )
+
+            return JsonResponse({'mensaje': 'Producto y ubicación actualizados exitosamente'})
 
         except Exception as e:
             print(f"Error al actualizar el producto: {e}")
-            return JsonResponse({'error': 'Error al actualizar el producto'}, status=500)
+            return JsonResponse({'error': f'Error al actualizar el producto: {str(e)}'}, status=500)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+
+
 
 # Eliminar producto
 @csrf_exempt
@@ -192,3 +250,5 @@ from .models import Producto, Almacen
 def product_form(request):
     almacenes = Almacen.objects.all() 
     return render(request, 'inventory/product_form.html', {'almacenes': almacenes})
+
+

@@ -1,16 +1,22 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('product-form');
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const messageContainer = document.getElementById('message-container');
+    const csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+
+    // Verificar que el token CSRF exista antes de usarlo
+    if (!csrfTokenElement) {
+        console.error("Error: No se encontró el token CSRF.");
+        alert("Error: No se encontró el token CSRF. Por favor, recargue la página.");
+        return;  // Salir si no se encuentra el token CSRF
+    }
+
+    const csrfToken = csrfTokenElement.value;
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();  // Evitar el envío del formulario tradicional
-        messageContainer.innerHTML = '';  // Limpiar mensajes previos
 
         const formData = {
             codigo_producto: document.getElementById('codigo_producto').value,
             nombre: document.getElementById('nombre_producto').value,
-            descripcion: document.getElementById('descripcion').value,
             proveedor: document.getElementById('proveedor').value,
             categoria: document.getElementById('categoria').value,
             cantidad_por_unidad: document.getElementById('cantidad_por_unidad').value,
@@ -34,22 +40,15 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                showMessage(data.error, 'error');
+                alert(data.error);  // Mostrar mensaje de error en una alerta
             } else {
-                showMessage('Producto creado exitosamente', 'success');
+                alert('Producto creado exitosamente');
                 form.reset();  // Limpiar el formulario después de agregar
             }
         })
         .catch(error => {
             console.error('Error al crear el producto:', error);
-            showMessage('Error al crear el producto', 'error');
+            alert('Error al crear el producto');
         });
     });
-
-    function showMessage(message, type) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add(type === 'error' ? 'error-message' : 'success-message');
-        messageElement.textContent = message;
-        messageContainer.appendChild(messageElement);
-    }
 });

@@ -24,29 +24,29 @@ h2 {
 
 .tabs {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    background-color: #f0f0f0;
-    padding: 0.5rem;
-    border-radius: 8px;
+    justify-content: center;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
 }
 
-.tabs button {
-    padding: 0.5rem 1rem;
+.tabs a {
+    padding: 0.6rem 1.2rem;
     border: 1px solid #ccc;
     background-color: #e0e0e0;
     color: black;
     cursor: pointer;
     border-radius: 8px;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
 }
 
-.tabs button.active {
+.tabs a.active {
     background-color: #5c6bc0;
     color: white;
 }
 
-.tabs button:hover {
+.tabs a:hover {
     background-color: #3949ab;
     color: white;
 }
@@ -58,6 +58,57 @@ form {
     padding-left: 1.5rem;
 }
 
+/* Contenedor de búsqueda */
+.search-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.search-container label {
+    padding: 0.6rem 1.2rem;
+    color: black;
+    cursor: pointer;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+
+    font-size: 1.2rem;
+    width: 29%;
+    text-align: left;
+}
+
+.search-container input[type="text"] {
+    width: 50%; /* Igual que los demás campos */
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    background-color: #d9d9d9;
+}
+
+.search-container input[type="text"]::placeholder {
+    color: #999;
+}
+
+.search-container button {
+    padding: 0.6rem 1.2rem;
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.search-container button:hover {
+    background-color: #3949ab;
+}
+
+
 .form-field {
     display: flex;
     justify-content: space-between;
@@ -66,36 +117,34 @@ form {
 }
 
 .form-field label {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     width: 30%;
     text-align: left;
 }
 
-.form-field input {
+.form-field input, .form-field select {
     width: 65%;
     padding: 0.6rem;
     border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     background-color: #d9d9d9;
 }
 
-.form-field input[disabled] {
-    background-color: #ccc; 
-    color: #000; 
+.form-field input::placeholder {
+    color: #999;
 }
 
 .btn-submit {
-    width: 45%;
+    width: 100%;
     padding: 0.8rem;
     background-color: #5c6bc0;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1.5rem;
-    margin: 1.5rem auto 0 auto;
-    display: block;
+    font-size: 1.3rem;
+    margin-top: 1.5rem;
 }
 
 .btn-submit:hover {

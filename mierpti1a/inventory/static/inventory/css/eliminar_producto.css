@@ -9,55 +9,36 @@ body {
 }
 
 .container {
-    width: 600px;
+    width: 650px;
     background-color: white;
     box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     border-radius: 12px;
-    padding: 2rem;
+    padding: 1.5rem;
     text-align: center;
-}
-
-.section-label {
-    text-align: left;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
 }
 
 h2 {
-    font-size: 1.8rem;
     margin-bottom: 1.5rem;
-}
-
-.alert {
-    background-color: #f4f4f9;
-    color: red;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-    text-align: center;
-    border: 1px solid #ccc;
+    font-size: 2rem;
 }
 
 .tabs {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    background-color: #f0f0f0;
-    padding: 0.5rem;
-    border-radius: 8px;
+    justify-content: center;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
 }
 
 .tabs a {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     border: 1px solid #ccc;
     background-color: #e0e0e0;
     color: black;
     cursor: pointer;
     border-radius: 8px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     text-decoration: none;
+    transition: background-color 0.3s;
 }
 
 .tabs a.active {
@@ -70,48 +51,98 @@ h2 {
     color: white;
 }
 
-form {
+.search-container {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    width: 100%;
+    margin-bottom: 1.5rem;
 }
 
-.form-field {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    width: 80%;
-}
-
-.form-field label {
-    font-size: 1.3rem;
-    width: 40%;
+.search-container label {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+    transition: background-color 0.3s;
+    font-size: 1.2rem;
+    width: 29%;
     text-align: left;
 }
 
-.form-field input {
-    width: 60%;
+.search-container input[type="text"] {
+    width: 50%;
     padding: 0.6rem;
     border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     background-color: #d9d9d9;
 }
 
-.form-field input:disabled {
-    background-color: #ebebeb;
+.search-container input[type="text"]::placeholder {
+    color: #999;
 }
 
-.btn-submit {
-    padding: 0.8rem 1.5rem;
+.search-container button {
+    padding: 0.6rem 1.2rem;
     background-color: #5c6bc0;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.search-container button:hover {
+    background-color: #3949ab;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+
+.form-field label {
+    font-size: 1.2rem;
+    width: 30%;
+    text-align: left;
+}
+
+.form-field input {
+    width: 65%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    background-color: #d9d9d9;
+}
+
+.form-field input::placeholder {
+    color: #999;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.3rem;
     margin-top: 1.5rem;
-    width: 150px;
 }
 
 .btn-submit:hover {
