@@ -1,5 +1,22 @@
+import random
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+class Almacen(models.Model):
+    nombre = models.CharField(max_length=100)
+    ubicacion = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f'{self.nombre} - {self.ubicacion}'
+
+class UbicacionProducto(models.Model):
+    producto = models.ForeignKey('Producto', on_delete=models.CASCADE)
+    almacen = models.ForeignKey(Almacen, on_delete=models.CASCADE)
+    estante = models.CharField(max_length=50)
+    lugar = models.CharField(max_length=50)  # Número de caja o posición en el estante
+
+    def __str__(self):
+        return f'{self.producto} en {self.almacen} - Estante: {self.estante}, Lugar: {self.lugar}'
 
 class EmpleadoManager(BaseUserManager):
     def crear_empleado(self, email, nombre_usuario, password=None, **extra_fields):
@@ -45,6 +62,7 @@ class Empleado(AbstractBaseUser):
 
 
 class Producto(models.Model):
+    codigo_producto = models.CharField(max_length=13, unique=True, blank=True)
     nombre_producto = models.CharField(max_length=255)
     proveedor = models.CharField(max_length=255)
     categoria = models.CharField(max_length=100)
@@ -52,42 +70,16 @@ class Producto(models.Model):
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     unidades_en_existencia = models.IntegerField()
     unidades_en_pedido = models.IntegerField()
-    nivel_reorden = models.IntegerField()  # ReorderLevel
+    nivel_reorden = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        # Genera un código de 13 dígitos si no se proporciona uno
+        if not self.codigo_producto:
+            self.codigo_producto = ''.join([str(random.randint(0, 9)) for _ in range(13)])
+        super(Producto, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre_producto
-
-
-class Almacen(models.Model):
-    nombre = models.CharField(max_length=255)
-    ubicacion = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.nombre
-
-
-class UbicacionProducto(models.Model):
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    almacen = models.ForeignKey(Almacen, on_delete=models.CASCADE)
-    estante = models.CharField(max_length=50)
-    lugar = models.CharField(max_length=50)  # Por ejemplo, un número de caja o posición en el estante
-    cantidad = models.IntegerField()
-
-    def __str__(self):
-        return f'{self.producto.nombre_producto} en estante {self.estante}, lugar {self.lugar}'
-
-    def agregar_stock(self, cantidad):
-        """Incrementar el stock en tiempo real"""
-        self.cantidad += cantidad
-        self.save()
-
-    def retirar_stock(self, cantidad):
-        """Disminuir el stock en tiempo real"""
-        if self.cantidad >= cantidad:
-            self.cantidad -= cantidad
-            self.save()
-        else:
-            raise ValueError('No hay suficiente stock para retirar')
 
 
 class Orden(models.Model):

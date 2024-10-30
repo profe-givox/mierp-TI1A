@@ -4,130 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos - Mi Changarrito</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            width: 900px;
-            background-color: white;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-        }
-        h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-        }
-        .tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1rem;
-            gap: 0.2rem;
-        }
-        .tabs a {
-            padding: 0.5rem 1.2rem;
-            border: 1px solid #ccc;
-            background-color: #e0e0e0;
-            color: black;
-            cursor: pointer;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            text-decoration: none;
-        }
-        .tabs a.active {
-            background-color: #5c6bc0;
-            color: white;
-        }
-        .tabs a:hover {
-            background-color: #3949ab;
-            color: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1.5rem;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-        th, td {
-            padding: 0.8rem;
-            text-align: center;
-        }
-        th {
-            background-color: #e0e0e0;
-        }
-        .add-product {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #5c6bc0;
-            color: white;
-            font-size: 2rem;
-            padding: 0.5rem 1rem;
-            border-radius: 50%;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .add-product:hover {
-            background-color: #3949ab;
-        }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'inventory/css/ver_productos.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
     <div class="container">
         <h2>Productos</h2>
         <div class="tabs">
-            <a href="#">Agregar</a>
-            <a href="#">Editar</a>
-            <a href="#">Eliminar</a>
-            <a href="#">Ventas</a>
-            <a href="#">Pedidos</a>
-            <a href="#" class="active">Productos</a>
+            <a href="{% url 'product_form' %}">Agregar</a>
+            <a href="{% url 'editar_producto' %}">Editar</a>
+            <a href="{% url 'eliminar_producto' %}">Eliminar</a>
+            <a href="{% url 'ventas' %}">Ventas</a>
+            <a href="{% url 'pedidos' %}">Pedidos</a>
+            <a href="{% url 'ver_productos' %}" class="active">Productos</a>
         </div>
 
+        <!-- Barra de búsqueda -->
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Buscar por código o nombre...">
+            <button id="search-button">Buscar</button>
+        </div>
+        
         <table>
             <thead>
                 <tr>
-                    <th>Código</th>
-                    <th>Descripción</th>
-                    <th>Precio</th>
-                    <th>Cantidad existente</th>
-                    <th>Precio mayoreo</th>
-                    <th>Precio menudeo</th>
+                    <th>Código del Producto</th>
+                    <th>Nombre del Producto</th>
+                    <th>Proveedor</th>
+                    <th>Categoría</th>
+                    <th>Cantidad por Unidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Unidades en Existencia</th>
+                    <th>Unidades en Pedido</th>
+                    <th>Nivel de Reorden</th>
+                    <th>Almacén</th>
+                    <th>Ubicación del Almacén</th> <!-- Nueva columna -->
+                    <th>Estante</th>
+                    <th>Lugar</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>001</td>
-                    <td>Maruchan</td>
-                    <td>$100</td>
-                    <td>50</td>
-                    <td>$90</td>
-                    <td>$110</td>
-                </tr>
-                <tr>
-                    <td>002</td>
-                    <td>Lalo uwu</td>
-                    <td>$200</td>
-                    <td>30</td>
-                    <td>$180</td>
-                    <td>$220</td>
-                </tr>
+            <tbody id="productos-list">
+                <!-- Los productos se cargarán aquí mediante AJAX -->
             </tbody>
         </table>
 
-        <a href="#" class="add-product">+</a>
+        <a href="{% url 'product_form' %}" class="add-product">+</a>
     </div>
 
+    <!-- Enlace al archivo JavaScript -->
+    <script src="{% static 'inventory/js/productos.js' %}"></script>
 </body>
 </html>
