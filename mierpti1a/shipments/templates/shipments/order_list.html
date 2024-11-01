@@ -1,17 +1,58 @@
-<!-- shipments/templates/shipments/order_list.html -->
-{% extends "base_generic.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Pedidos</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <h1 style="text-align: center; color: #FF9900;">Gestión de Pedidos</h1>
 
-{% block content %}
-  <h2>Lista de Pedidos</h2>
-  <a href="{% url 'order_create' %}">Crear nuevo pedido</a>
-  <ul>
-    {% for order in orders %}
-      <li>
-        <a href="{% url 'order_detail' order.id %}">Pedido #{{ order.id }} - {{ order.product }}</a>
-        <br>
-        <!-- Enlace para ver la ruta de cada pedido -->
-        <a href="{% url 'route_detail' order.id %}" style="color: green; text-decoration: underline;">Ver ruta de entrega</a>
-      </li>
-    {% endfor %}
-  </ul>
-{% endblock %}
+    <!-- Botón para crear un nuevo pedido -->
+    <div style="text-align: right; margin-bottom: 20px;">
+        <a href="{% url 'shipments:order_create' %}" 
+           style="background-color: #FF9900; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+           Crear Pedido
+        </a>
+    </div>
+
+    <!-- Tabla de pedidos -->
+    <table style="width: 100%; border-collapse: collapse; background-color: white;">
+        <thead>
+            <tr style="background-color: #FF9900; color: white;">
+                <th style="padding: 10px; border: 1px solid #ddd;">Producto</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Cantidad</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Estado</th>
+                {% if user.is_superuser %}<th style="padding: 10px; border: 1px solid #ddd;">Dueño</th>{% endif %}
+                <th style="padding: 10px; border: 1px solid #ddd;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.product }}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.quantity }}</td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.get_status_display }}</td>
+                {% if user.is_superuser %}
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.user.username }}</td>
+                {% endif %}
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                    <a href="{% url 'shipments:order_detail' order.id %}" 
+                       style="background-color: #0073e6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px; margin-right: 5px;">
+                       Ver Detalles
+                    </a>
+                    <a href="{% url 'shipments:order_edit' order.id %}" 
+                       style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;">
+                       Editar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+
+    <footer style="text-align: center; padding: 10px; margin-top: 20px; color: #666;">
+        © 2024 - Proyecto Django
+    </footer>
+</body>
+</html>
