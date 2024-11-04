@@ -17,3 +17,6 @@ urlpatterns = [
     path('sucursales/eliminar/<int:pk>/', eliminar_sucursal, name='eliminar_sucursal')
 
 ]
+
+urlpatterns = [
+]

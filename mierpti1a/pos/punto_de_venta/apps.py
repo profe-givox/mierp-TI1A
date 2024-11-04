@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class PosConfig(AppConfig):
+class PuntoDeVentaConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'pos'
+    name = 'punto_de_venta'
