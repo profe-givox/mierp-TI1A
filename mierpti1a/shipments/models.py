@@ -51,4 +51,15 @@ class Route(models.Model):
     def __str__(self):
         return f"Route for Order {self.order.id}"
     
+class Sucursal(models.Model):
+    nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=255)
+    ciudad = models.CharField(max_length=100)  # Asegúrate de que este campo esté presente
+    estado = models.CharField(max_length=100)  # Asegúrate de que este campo esté presente
+    latitud = models.FloatField()
+    longitud = models.FloatField()
+
+    def __str__(self):
+        return self.nombre
+    
 

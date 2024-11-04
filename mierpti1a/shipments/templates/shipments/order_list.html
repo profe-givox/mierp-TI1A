@@ -3,17 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Pedidos</title>
+    <style>
+        /* Estilo de la barra de navegación */
+        .navbar {
+            display: flex;
+            justify-content: flex-start; /* Alinea los elementos a la izquierda */
+            background-color: #232f3e;
+            padding: 10px;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 5px;
+            background-color: #ffa41c;
+        }
+        .navbar a:hover {
+            background-color: #f79400;
+        }
+    </style>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-    <h1 style="text-align: center; color: #FF9900;">Gestión de Pedidos</h1>
-
-    <!-- Botón para crear un nuevo pedido -->
-    <div style="text-align: right; margin-bottom: 20px;">
-        <a href="{% url 'shipments:order_create' %}" 
-           style="background-color: #FF9900; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-           Crear Pedido
-        </a>
+    
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="{% url 'shipments:order_create' %}">Crear Pedido</a>
+        {% if user.is_superuser %}
+            <a href="{% url 'shipments:agregar_sucursal' %}">Agregar Sucursal</a>
+            <a href="{% url 'shipments:listar_sucursales' %}">Ver Sucursales</a>
+        {% endif %}
     </div>
+
+    <h1 style="text-align: center; color: #FF9900;">Gestión de Pedidos</h1>
 
     <!-- Tabla de pedidos -->
     <table style="width: 100%; border-collapse: collapse; background-color: white;">
@@ -48,7 +70,6 @@
             </tr>
             {% endfor %}
         </tbody>
-        
     </table>
 
     <footer style="text-align: center; padding: 10px; margin-top: 20px; color: #666;">

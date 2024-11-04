@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Sucursales</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Diseño estilo Amazon */
+
+        .navbar {
+            display: flex;
+            justify-content: flex-start; /* Alinea los elementos a la izquierda */
+            background-color: #232f3e;
+            padding: 10px;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 5px;
+            background-color: #ffa41c;
+        }
+        .navbar a:hover {
+            background-color: #f79400;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .sucursal-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sucursal-details {
+            flex: 1;
+        }
+        .sucursal-actions {
+            margin-left: 20px;
+        }
+        button {
+            background-color: #ffa41c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #f79400;
+        }
+        #map {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="/shipments/sucursales/agregar/">Agregar Sucursal</a>
+        <a href="/shipments/orders/">Lista de Órdenes</a>
+    </div>
+
+    <div class="container">
+        <h1>Listado de Sucursales</h1>
+        <div id="map"></div>
+        {% for sucursal in sucursales %}
+            <div class="sucursal-card" id="sucursal-{{ sucursal.id }}">
+                <div class="sucursal-details">
+                    <strong>Nombre:</strong> {{ sucursal.nombre }}<br>
+                    <strong>Dirección:</strong> {{ sucursal.direccion }}<br>
+                    <strong>Ciudad:</strong> {{ sucursal.ciudad }}<br>
+                    <strong>Estado:</strong> {{ sucursal.estado }}
+                </div>
+                <div class="sucursal-actions">
+                    <button onclick="eliminarSucursal(parseInt('{{ sucursal.id }}'))">Eliminar</button>
+                </div>
+            </div>
+        {% empty %}
+            <p>No hay sucursales disponibles.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Contenedor oculto para pasar JSON al JavaScript -->
+    <script type="application/json" id="sucursales-data">
+        {{ sucursales_json|safe }}
+    </script>
+
+    <script>
+        function initMap() {
+            const sucursales = JSON.parse(document.getElementById('sucursales-data').textContent);
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 20.1406, lng: -101.1812 },
+                zoom: 6
+            });
+
+            sucursales.forEach(sucursal => {
+                new google.maps.Marker({
+                    position: { lat: sucursal.latitud, lng: sucursal.longitud },
+                    map: map,
+                    title: sucursal.nombre
+                });
+            });
+        }
+
+        function eliminarSucursal(id) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/shipments/sucursales/eliminar/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken') // Función para obtener el CSRF token
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+            })
+            .then(data => {
+                Swal.fire(
+                    'Eliminado',
+                    data.message || 'Sucursal eliminada con éxito',
+                    'success'
+                ).then(() => {
+                    window.location.reload();
+                });
+            })
+            .catch(error => {
+                Swal.fire(
+                    'Error',
+                    'No se pudo completar la solicitud',
+                    'error'
+                );
+            });
+        }
+    });
+}
+
+// Función para obtener el CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Verifica si este nombre de cookie empieza con el nombre buscado
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_tYUieb85dere5xXpZvN3WKRzZjpLPE4&callback=initMap"></script>
+</body>
+</html>
