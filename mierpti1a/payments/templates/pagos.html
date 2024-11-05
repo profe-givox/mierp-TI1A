@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles/pagos.css' %}">
+    <title>Formulario de Pago</title>
+
+</head>
+<body>
+
+<div class="container">
+    
+    <h2>Selecciona una forma de pago:</h2>
+    
+    <div class="payment-methods">
+        <button class="active">Tarjeta</button>
+        <button>PayPal</button>
+    </div>
+    
+    
+
+    <form action="" method="">
+        <div class="form-group">
+            <label for="cardholder-name">Titular de tarjeta</label>
+            <input type="text" id="cardholder-name" name="cardholder-name" placeholder="ejemplo: María Rodríguez" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="card-number">Número de tarjeta</label>
+            <input type="text" id="card-number" name="card-number" placeholder="ejemplo: 1111222233334444" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="expiry-date">Fecha de vencimiento</label>
+            <input type="text" id="expiry-date" name="expiry-date" placeholder="MM/AA" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="cvv">Código de seguridad</label>
+            <input type="text" id="cvv" name="cvv" placeholder="CVV" required>
+        </div>
+        
+
+        <div class="submit-button">
+            <button type="submit">Pagar y finalizar</button>
+        </div>
+    </form>
+
+    <div class="guarantee">
+        <div class="secure">
+            <p>Pago 100% seguro ;)</p>
+            <img src="" width="200">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
