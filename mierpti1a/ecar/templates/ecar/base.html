@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>{% block title %}Mi Tienda{% endblock %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
       .search-bar {
@@ -78,10 +78,15 @@
               </li>
             </ul>
 
-            <!-- Foto de usuario -->
+            <!-- Foto de usuario con menú desplegable para cerrar sesión -->
             <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link" href="#"><img src="https://cdn.discordapp.com/attachments/932697148481503312/1291944010809737297/461922826_843821781236489_6581517024011301309_n.png?ex=6703ea5f&is=670298df&hm=3058064a80ce37388c41fd2b5cae4d8770301bde2dced2502a71a65aa4a38ac3&" alt="Foto de usuario" class="rounded-circle" width="30" height="30" /></a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <img src="https://cdn.discordapp.com/attachments/932697148481503312/1302064963032059925/464487294_1243297606991688_6814852431220467341_n.png?ex=67276abe&is=6726193e&hm=e2db6757f820771d6445ddd86b094354e734227c211a0075cbfc3a7ef4437739&" alt="Foto de usuario" class="rounded-circle" width="30" height="30" />
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li><a class="dropdown-item" href="{% url 'logout' %}?next=/login/">Cerrar sesión</a></li>
+                </ul>
               </li>
             </ul>
           </div>
@@ -92,61 +97,64 @@
 
       {% endblock %}
     </div>
-  </body>
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      // Función para obtener el token CSRF desde la metaetiqueta
-      function getCookie(name) {
-        let cookieValue = null
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';')
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim()
-            if (cookie.substring(0, name.length + 1) === name + '=') {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-              break
+
+    <!-- jQuery y Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Función para obtener el token CSRF desde la metaetiqueta
+        function getCookie(name) {
+          let cookieValue = null
+          if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';')
+            for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim()
+              if (cookie.substring(0, name.length + 1) === name + '=') {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+                break
+              }
             }
           }
+          return cookieValue
         }
-        return cookieValue
-      }
-    
-      const csrftoken = getCookie('csrftoken')
-    
-      function csrfSafeMethod(method) {
-        // Estos métodos no requieren CSRF
-        return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
-      }
-    
-      // Configura jQuery para incluir automáticamente el token CSRF en las solicitudes POST
-      $.ajaxSetup({
-        beforeSend: function (xhr, settings) {
-          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader('X-CSRFToken', csrftoken)
+      
+        const csrftoken = getCookie('csrftoken')
+      
+        function csrfSafeMethod(method) {
+          // Estos métodos no requieren CSRF
+          return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
+        }
+      
+        // Configura jQuery para incluir automáticamente el token CSRF en las solicitudes POST
+        $.ajaxSetup({
+          beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader('X-CSRFToken', csrftoken)
+            }
           }
+        })
+      
+        // Función para actualizar el carrito en la interfaz
+        function actualizarCarrito() {
+          $.get('/ecar/api/carritos/1/', function (data) {
+            // Cambia '1' por el ID del carrito del usuario actual
+            let items = data.productos.map((item) => `<li>${item.producto.nombre} - Cantidad: ${item.cantidad}</li>`).join('')
+            $('#cart-items').html(items || '<li>El carrito está vacío.</li>')
+          })
         }
-      })
-    
-      // Función para actualizar el carrito en la interfaz
-      function actualizarCarrito() {
-        $.get('/ecar/api/carritos/1/', function (data) {
-          // Cambia '1' por el ID del carrito del usuario actual
-          let items = data.productos.map((item) => `<li>${item.producto.nombre} - Cantidad: ${item.cantidad}</li>`).join('')
-          $('#cart-items').html(items || '<li>El carrito está vacío.</li>')
-        })
-      }
-    
-      // Llama a actualizarCarrito al cargar la página
-      actualizarCarrito()
-    
-      // Ejemplo de agregar producto al carrito
-      $(document).on('click', '.add-to-cart', function () {
-        const productoId = $(this).data('id')
-        $.post('/ecar/api/carrito-productos/', { producto: productoId, cantidad: 1 }, function () {
-          actualizarCarrito() // Actualiza el carrito después de agregar un producto
+      
+        // Llama a actualizarCarrito al cargar la página
+        actualizarCarrito()
+      
+        // Ejemplo de agregar producto al carrito
+        $(document).on('click', '.add-to-cart', function () {
+          const productoId = $(this).data('id')
+          $.post('/ecar/api/carrito-productos/', { producto: productoId, cantidad: 1 }, function () {
+            actualizarCarrito() // Actualiza el carrito después de agregar un producto
+          })
         })
       })
-    })
-  </script>
+    </script>
+  </body>
 </html>
