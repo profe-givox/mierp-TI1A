@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
+
+
 
 class Sucursal(models.Model):
     nombre = models.CharField(max_length=100)
@@ -11,7 +14,6 @@ class Sucursal(models.Model):
 class Departamento(models.Model):
     nombre = models.CharField(max_length=100)
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE)
-
     def __str__(self):
         return f'{self.nombre} - {self.sucursal}'
 
@@ -25,19 +27,18 @@ class Puesto(models.Model):
 
 
 class Empleado(models.Model):
+    Username = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     SEXO_CHOICES = [
         ('M', 'Masculino'),
         ('F', 'Femenino'),
         ('O', 'Otro'),
     ]
-
     ESTADO_CIVIL_CHOICES = [
         ('S', 'Soltero/a'),
         ('C', 'Casado/a'),
         ('D', 'Divorciado/a'),
         ('V', 'Viudo/a'),
     ]
-
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
@@ -52,12 +53,24 @@ class Empleado(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE)
     departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE)
     puesto = models.ForeignKey(Puesto, on_delete=models.CASCADE)
-    folioEmpleado = models.CharField(max_length=5)
-    contraseña = models.CharField(max_length=8)
     foto = models.ImageField(upload_to='fotos_empleados/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.Username_id:
+            user = User.objects.create_user(
+                username=self.correo.split('@')[0],
+                email=self.correo,
+                password=self.rfc,
+                first_name=self.nombre,
+                last_name=self.apellidos
+            )
+            self.Username = user
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.nombre} {self.apellidos} - {self.puesto}'
+
+
     
 class Nomina(models.Model):
     codigo = models.CharField(primary_key=True, max_length=6)
@@ -96,8 +109,8 @@ class Percepciones(models.Model):
     monto = models.DecimalField(max_digits=10, decimal_places=2)  # Máximo 10 dígitos en total, 2 decimales
 
 class Salida_Entrada(models.Model):
-    codigo_empleado = models.CharField(primary_key=True, max_length=5)
-    hora = models.DateTimeField()
+    codigo_empleado = models.ForeignKey(Empleado, on_delete=models.CASCADE)  # Relación con Empleado
+    hora = models.DateTimeField(auto_now_add=True)
     ENTRADA_SALIDA = [
         ('E', 'Entrada'),
         ('S', 'Salida')

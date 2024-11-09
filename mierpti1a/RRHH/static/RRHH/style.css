@@ -1,41 +1,67 @@
-.main-content {
-    width: 25%; /* Ajusta el ancho */
-    height: 30%; /* Ajusta la altura para que sea cuadrado */
-    border-radius: 20px; /* Bordes completamente redondeados */
-    box-shadow: 0 8px 15px rgba(0,0,0,.3); /* Sombra más suave y sutil */
-    margin: 2em auto; /* Margen centrado */
-    background-color: #4CAF50; /* Color verde más atractivo */
-    padding: 2em; /* Padding para un diseño más limpio */
-    position: relative; /* Posicionamiento relativo para mayor control */
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap; /* Permite que en pantallas pequeñas, el contenido se ajuste hacia abajo */
 }
 
-.company__info {
-    display: none; /* Mantiene oculta la sección de información de la compañía */
+.main-content {
+    width: 30%; 
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, .3);
+    margin: 2em 1em;
+    background-color: #4CAF50;
+    padding: 1.5em;
+    position: relative;
+    top: 1em;
+    left: 1em;
 }
+
 
 .login_form {
     background-color: #fff;
-    border-radius: 20px; /* Bordes completamente redondeados */
+    border-radius: 20px;
     border: 1px solid #ccc;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 1.5em; /* Padding más pequeño para ajustarse al tamaño reducido */
-    height: 100%; /* Asegura que el formulario ocupe toda la altura del contenedor */
+    padding: 1em;
+    height: auto;
+}
+.employee-slots {
+    width: 60%; /* Para que ocupe el mismo ancho que el formulario */
+    padding: 1.5em;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    text-align: left;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+/* Las cajas de los slots permanecen como estaban, con tamaño y estilo definido */
+.slot {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #ddd;
+    display: inline-block;
+    background-color: #fff;
+    text-align: center;
+    line-height: 100px;
+    border-radius: 10px;
+    margin: 10px;
 }
+
+.slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 
 .form__input {
     width: 100%;
     border: 1px solid #aaa;
-    border-radius: 50px; /* Bordes redondeados completos */
-    padding: 0.75em 1.5em; /* Espacio interno ajustado */
+    border-radius: 50px;
+    padding: 1em 1.5em;
     margin: 1em 0;
     outline: none;
     transition: all 0.3s ease;
@@ -44,18 +70,7 @@ form {
 
 .form__input:focus {
     border-color: #4CAF50;
-    box-shadow: 0 0 5px rgba(0,80,80,0.5); 
-}
-
-.form__input::before {
-    content: attr(data-icon);
-    font-family: FontAwesome;
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.2em;
-    color: #aaa;
+    box-shadow: 0 0 5px rgba(0,80,80,0.5);
 }
 
 .btn-container {
@@ -65,10 +80,10 @@ form {
 }
 
 .btn {
-    width: 48%; /* Ajusta el ancho para que los botones quepan juntos */
-    border-radius: 50px; /* Bordes completamente redondeados */
+    width: 48%;
+    border-radius: 50px;
     color: #fff;
-    background: linear-gradient(to right, #4CAF50, #81C784); /* Color degradado */
+    background: linear-gradient(to right, #4CAF50, #81C784);
     border: none;
     padding: 1em;
     margin: 1em 0;
@@ -78,12 +93,13 @@ form {
 }
 
 .btn:hover, .btn:focus {
-    background: linear-gradient(to right, #388E3C, #66BB6A); /* Color degradado al pasar el ratón */
+    background: linear-gradient(to right, #388E3C, #66BB6A);
 }
 
 h2 {
-    color: #fff;
+    color: #000;
     margin-bottom: 1.5em;
     font-size: 1.8em;
 }
+
 

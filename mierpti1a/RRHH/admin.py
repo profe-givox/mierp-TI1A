@@ -8,7 +8,9 @@ admin.site.register(Puesto)
 admin.site.register(Empleado)
 admin.site.register(Nomina)
 admin.site.register(Percepciones)
-admin.site.register(Salida_Entrada)
+admin.site.register(Salida_Entrada
+
+)
 
 
 
