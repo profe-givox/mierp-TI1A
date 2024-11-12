@@ -16,23 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+
+from django.contrib.auth import views as auth_views
+
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
+    path('shipments/', include('shipments.urls', namespace='shipments')),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),   
+    path('RRHH/', include('RRHH.urls')),
     path('pos', include('pos.urls')),
     path('crm', include('crm.urls')),
     path('inventory', include('inventory.urls')),
     path('ecar/', include('ecar.urls')), 
     path('payments' , include('payments.urls')),
-    path('shipments/', include('shipments.urls')),
     path('api-auth/', include('rest_framework.urls')),
-
 ]
 
 # Configuración para servir archivos de medios durante el desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    

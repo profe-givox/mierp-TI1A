@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="{% static 'crm/content/bootstrap/bootstrap.min.css' %}">
 </head>
 <body>
-    <div class="container">
-        {% block content %}
-        
-        {% endblock %}
-    </div>
+    
+    {% include "crm/navbar.html" %}
+
+    {% block content %}
+    {% endblock %}
 
     <script src="{% static 'crm/scripts/bootstrap/bootstrap.bundle.min.js' %}"></script>
 </body>
