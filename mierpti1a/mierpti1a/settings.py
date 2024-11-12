@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shipments',
+    'inventory', 
     'rest_framework',
     'ecar',
 ]
@@ -59,7 +60,7 @@ ROOT_URLCONF = 'mierpti1a.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,7 +71,7 @@ TEMPLATES = [
             ],
         },
     },
-]   
+]
 
 WSGI_APPLICATION = 'mierpti1a.wsgi.application'
 
@@ -117,12 +118,15 @@ USE_I18N = True
 USE_TZ = True
 
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "ecar",  # Agrega la ruta de la carpeta que contiene los estáticos
+    BASE_DIR / "static",
+    BASE_DIR / "inventory/static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
