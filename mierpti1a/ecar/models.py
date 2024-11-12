@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 # Modelo de Producto
 class Producto(models.Model):
@@ -8,10 +9,18 @@ class Producto(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     imagen = models.ImageField(upload_to='productos/', null=True, blank=True)
+    descuento = models.PositiveIntegerField(default=0)  # Descuento en porcentaje
 
     def __str__(self):
         return self.nombre
 
+    def precio_con_descuento(self):
+        if self.descuento > 0:
+            descuento_decimal = Decimal(self.descuento) / Decimal(100)
+            return self.precio * (Decimal(1) - descuento_decimal)
+        return self.precio
+
+# Modelo de Carrito
 class Carrito(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     productos = models.ManyToManyField(Producto, through='CarritoProducto')
@@ -33,9 +42,9 @@ class Carrito(models.Model):
     def calcular_total(self):
         total = 0
         for item in self.carritoproducto_set.all():
-            total += item.producto.precio * item.cantidad
+            total += item.producto.precio_con_descuento() * item.cantidad
         return total
-    
+
 # Modelo de relación entre Carrito y Producto (Cantidad)
 class CarritoProducto(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)

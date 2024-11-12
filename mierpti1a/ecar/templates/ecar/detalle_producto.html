@@ -1,5 +1,7 @@
+{% extends 'ecar/base.html' %}
 {% block content %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,14 +18,21 @@
         <img src="{{ producto.imagen.url }}" class="img-fluid" alt="{{ producto.nombre }}">
         <p>{{ producto.descripcion }}</p>
         <p><strong>Precio: ${{ producto.precio }}</strong></p>
+        <p>Descuento: {{ producto.descuento }}%</p>
+        <p><strong>Precio con Descuento: ${{ producto.precio_con_descuento }}</strong></p>
         <p>Stock: {{ producto.stock }}</p>
         <a href="{% url 'catalogo' %}" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
-        <a href="{% url 'carrito' %}" class="btn btn-outline-success btn-sm add-to-cart" data-id="{{ producto.id }}">
-            Añadir al carrito <i class="bi bi-cart-plus"></i>
-        </a>
+        <form action="{% url 'agregar_al_carrito' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+            <input type="hidden" name="cantidad" value="1">
+            <button type="submit" class="btn btn-outline-success btn-sm">
+                Añadir al carrito <i class="bi bi-cart-plus"></i>
+            </button>
+        </form>
     </div>
-    {% endblock %}
 </body>
 </html>
+{% endblock %}
