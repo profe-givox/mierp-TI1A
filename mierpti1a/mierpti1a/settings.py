@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'shipments',
     'inventory', 
     'rest_framework',
-    'ecar',
+
 ]
 
 MIDDLEWARE = [
@@ -144,3 +144,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGIN_REDIRECT_URL = '/shipments/orders/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
