@@ -146,5 +146,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-LOGIN_REDIRECT_URL = '/shipments/orders/'
+LOGIN_REDIRECT_URL = '/ecar/catalogo/'
+LOGIN_URL = '/ecar/login/'
+
+
+#LOGIN_REDIRECT_URL = '/shipments/orders/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
