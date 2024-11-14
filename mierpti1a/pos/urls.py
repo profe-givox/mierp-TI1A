@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     ## Vistas HTML
     path('', views.index, name='index'),

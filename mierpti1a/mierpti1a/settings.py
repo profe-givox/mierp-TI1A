@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'shipments',
     'inventory', 
     'rest_framework',
+    'pos', 
+    'ecar',
+    'payments',
 
 ]
 
