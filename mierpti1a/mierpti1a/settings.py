@@ -137,6 +137,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "ecar",  # Agrega la ruta de la carpeta que contiene los estáticos
     BASE_DIR / "static",
     BASE_DIR / "inventory/static",
+    BASE_DIR / "pos/static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 

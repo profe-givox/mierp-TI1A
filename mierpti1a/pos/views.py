@@ -27,12 +27,12 @@ def index(request):
         else:
             messages.error(request, 'Credenciales incorrectas. Inténtalo de nuevo.')
 
-    return render(request, 'pos/templates/index.html')
+    return render(request, 'index.html')
 
 
 ######## Vistas para el funcionamiento de productos ########
 def productos(request):
-    return render(request, 'pos/templates/administrarProductos.html')
+    return render(request, 'administrarProductos.html')
 
 def get_productos(request):
     productos = list(Producto.objects.values())
@@ -140,7 +140,7 @@ def borrar_producto(request, producto_id):
 
 #### Vistas para el funcionamiento de Ventas Realizadas ####
 def ventasRealizadas(request):
-    return render(request, 'pos/templates/ventasRealizadas.html')
+    return render(request, 'ventasRealizadas.html')
 
 def get_ventasRealizadas(request):
     if request.method == "GET":
@@ -189,7 +189,7 @@ def realizar_venta(request):
 
 ###### Catalago de productos en inventario ###### 
 def catalogo(request):
-    return render(request, 'pos/templates/catalogo.html')
+    return render(request, 'catalogo.html')
 
 def get_catalogo(request):
     catalogo = list(Producto.objects.values())
@@ -203,12 +203,12 @@ def get_catalogo(request):
 
 ###### Realizar Ventas ###### 
 def venta(request):
-    return render(request, 'pos/templates/ventas.html')
+    return render(request, 'ventas.html')
 
 
 #Control de Usuarios 
 def administrarUsuarios(request):
-    return render(request, 'pos/templates/administrarUsuarios.html')
+    return render(request, 'administrarUsuarios.html')
 
 # api conexion productos 
 def api_products(request):
@@ -224,7 +224,7 @@ def api_products(request):
 
 
 # Conexión con recursos humanos 
-#def login(request):
+# def login(request):
     if request.method == 'POST':
         # Recoger los datos del formulario o de la solicitud
         folio = request.POST.get('folio')
@@ -241,7 +241,7 @@ def api_products(request):
         }
 
         # Realiza la solicitud POST
-        response = requests.post(url, json=data)
+        response = request.post(url, json=data)
 
         # Procesa la respuesta de la API
         if response.status_code == 200:
