@@ -20,6 +20,7 @@ function handleLogin(event) {
         },
         body: JSON.stringify({
             folio: folio,  // Usamos el valor del campo de usuario
+            action: 'login',
             password: password  // Usamos el valor del campo de contraseña
         })
     })

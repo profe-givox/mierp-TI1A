@@ -1,5 +1,5 @@
 .col-md-4 {
-    flex: 0 0 200px;
+    flex: 0 0 300px;
     /* Ajusta el ancho de la columna a 200px */
 }
 
@@ -33,7 +33,7 @@
 }
 
 p {
-    width: 170px;
+    width: 250px;
     padding: 2px 5px;
     white-space: nowrap;
     overflow: hidden;

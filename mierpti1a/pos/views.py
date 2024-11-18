@@ -4,16 +4,12 @@ from .models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.shortcuts import get_object_or_404
-
-
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.db import transaction   
+from django.db import transaction
 
-#import requests
-
-###### Vista de Inicio de secion con identificacion implementada con Django y su funcion Autenticate ######
+###### Vista de Inicio de sesión con identificación implementada con Django y su función authenticate ######
 def index(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -27,30 +23,31 @@ def index(request):
         else:
             messages.error(request, 'Credenciales incorrectas. Inténtalo de nuevo.')
 
-    return render(request, 'index.html')
-
+    return render(request, 'index.html')  # O 'pos/index.html' si está dentro de una subcarpeta
 
 ######## Vistas para el funcionamiento de productos ########
 def productos(request):
-    return render(request, 'administrarProductos.html')
+    productos = Producto.objects.all()
+    return render(request, 'administrarProductos.html', {'productos': productos})
+
 
 def get_productos(request):
     productos = list(Producto.objects.values())
 
-    if (len(productos)>0):
-        data = {'message':"Success", 'productos':productos}
+    if len(productos) > 0:
+        data = {'message': "Success", 'productos': productos}
     else:
-        data = {'message':"Not Found"}
+        data = {'message': "Not Found"}
     
     return JsonResponse(data)
 
 def get_producto_por_id(request, producto_id):
     producto = list(Producto.objects.filter(id=producto_id).values())
     
-    if (len(producto)>0):
-        data = {'message':"Success", 'productos':producto}
+    if len(producto) > 0:
+        data = {'message': "Success", 'productos': producto}
     else:
-        data = {'message':"Not Found"}
+        data = {'message': "Not Found"}
     
     return JsonResponse(data)
 
@@ -136,8 +133,6 @@ def borrar_producto(request, producto_id):
         return JsonResponse({'message': 'Producto borrado con éxito'})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
-
 #### Vistas para el funcionamiento de Ventas Realizadas ####
 def ventasRealizadas(request):
     return render(request, 'ventasRealizadas.html')
@@ -171,7 +166,7 @@ def realizar_venta(request):
                 sucursal=sucursal,
                 descripcion=descripcion,
                 total=total,
-                fecha = data.get('fecha')
+                fecha=data.get('fecha')
             )
 
             return JsonResponse({'message': 'Venta registrada exitosamente'}, status=201)
@@ -187,17 +182,17 @@ def realizar_venta(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-###### Catalago de productos en inventario ###### 
+###### Catálogo de productos en inventario ###### 
 def catalogo(request):
     return render(request, 'catalogo.html')
 
 def get_catalogo(request):
     catalogo = list(Producto.objects.values())
     
-    if (len(catalogo)>0):
-        data = {'message':"Success", 'catalogo':catalogo}
+    if len(catalogo) > 0:
+        data = {'message': "Success", 'catalogo': catalogo}
     else:
-        data = {'message':"Not Found"}
+        data = {'message': "Not Found"}
     
     return JsonResponse(data)
 
@@ -205,48 +200,16 @@ def get_catalogo(request):
 def venta(request):
     return render(request, 'ventas.html')
 
-
-#Control de Usuarios 
+# Control de Usuarios 
 def administrarUsuarios(request):
     return render(request, 'administrarUsuarios.html')
 
-# api conexion productos 
+# API conexión productos 
 def api_products(request):
-    productos =list(Producto.objects.values())
+    productos = list(Producto.objects.values())
     
-    if (len(productos)>0):
-        data = {'contine': "ta bien", 'productos':productos}
-            
+    if len(productos) > 0:
+        data = {'contine': "ta bien", 'productos': productos}
     else:
-        data = {'no tiene':"productos"} 
+        data = {'no tiene': "productos"} 
     return JsonResponse(data)
-
-
-
-# Conexión con recursos humanos 
-# def login(request):
-    if request.method == 'POST':
-        # Recoger los datos del formulario o de la solicitud
-        folio = request.POST.get('folio')
-        password = request.POST.get('password')
-
-        # Define la URL de la API
-        url = "http://localhost:8000/RRHH/login/"
-
-        # Define los datos que quieres enviar en la solicitud POST
-        data = {
-            "folio": folio,
-            "action": "login",
-            "password": password
-        }
-
-        # Realiza la solicitud POST
-        response = request.post(url, json=data)
-
-        # Procesa la respuesta de la API
-        if response.status_code == 200:
-            resultado = response.json()
-            return JsonResponse({'status': 'success', 'data': resultado})
-        else:
-            return JsonResponse({'status': 'error', 'message': response.json()})
-    return render(request, 'index.html')
