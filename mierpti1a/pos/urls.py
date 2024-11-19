@@ -28,4 +28,8 @@ urlpatterns = [
     
     #api de productos 
     path('api_productos/', views.api_products, name='apiproducto'),
+
+    #PUTOS EXTRAS
+    path('clonar_empleados/', views.importar_empleados_desde_rrhh, name='simon'),
+    path('ventas/generar_voucher/<int:venta_id>/', views.generar_voucher, name='generar_voucher'),
 ]  

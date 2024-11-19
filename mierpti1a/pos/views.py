@@ -7,7 +7,13 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.db import transaction
+from django.db import transaction, IntegrityError
+from pos.models import Empleado as EmpleadoPos
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+
+import requests 
 
 ###### Vista de Inicio de sesión con identificación implementada con Django y su función authenticate ######
 def index(request):
@@ -51,45 +57,123 @@ def get_producto_por_id(request, producto_id):
     
     return JsonResponse(data)
 
+def sincronizar_sucursales():
+    try:
+        response = requests.get("http://localhost:8000/RRHH/get_sucursales/")
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('message') == "Success":
+                sucursales_rrhh = data['sucursales']
+                for sucursal in sucursales_rrhh:
+                    Sucursal.objects.update_or_create(
+                        id=sucursal['id'],  # Asegúrate de usar el mismo ID
+                        defaults={
+                            'nombre': sucursal['nombre'],
+                            'direccion': sucursal['direccion'],  # O cualquier otro campo que tengas
+                        }
+                    )
+                print("Sucursales sincronizadas exitosamente.")
+            else:
+                print("No se encontraron sucursales en RRHH.")
+        else:
+            print("Error al obtener sucursales:", response.status_code)
+    except Exception as e:
+        print("Error al sincronizar sucursales:", e)
+        
+def importar_empleados_desde_rrhh(request):
+    try:
+        # URL de la API en RRHH
+        rrhh_url = "http://localhost:8000/RRHH/get_empleados/"
+
+        # Realiza la solicitud GET para obtener los datos de empleados
+        response = requests.get(rrhh_url)
+
+        # Verifica si la solicitud fue exitosa
+        if response.status_code != 200:
+            return JsonResponse({'error': 'No se pudo obtener la lista de empleados desde RRHH'}, status=response.status_code)
+
+        # Decodifica la respuesta JSON
+        empleados_rrhh = response.json()
+
+        # Verificar el formato de la respuesta
+        print(empleados_rrhh)  # Para depurar y verificar el formato
+
+        # Asegurarse de que 'empleados' sea una lista de diccionarios
+        empleados_rrhh = empleados_rrhh.get('empleados', [])  # Ajustar según la estructura real de la respuesta
+
+        # Mapeos entre RRHH y POS
+        sucursal_mapping = {
+            1: EmpleadoPos.Sucursal.URIANGATO,
+            2: EmpleadoPos.Sucursal.PURUANDIRO,
+            3: EmpleadoPos.Sucursal.YURIRIA,
+        }
+        rol_mapping = {
+            1: EmpleadoPos.Rol.ADMINISTRADOR,
+            2: EmpleadoPos.Rol.EMPLEADO,
+            3: EmpleadoPos.Rol.GERENTE,
+            4: EmpleadoPos.Rol.SUPERVISOR,
+        }
+
+        empleados_importados = 0
+
+        for empleado in empleados_rrhh:
+            if isinstance(empleado, dict):  # Verifica que cada 'empleado' sea un diccionario
+                # Obtiene la sucursal y el rol de acuerdo con el ID
+                sucursal_pos = sucursal_mapping.get(empleado.get('sucursal_id'), EmpleadoPos.Sucursal.URIANGATO)
+                rol_pos = rol_mapping.get(empleado.get('puesto_id'), EmpleadoPos.Rol.EMPLEADO)
+
+                # Verifica si ya existe el empleado en POS para evitar duplicados
+                if EmpleadoPos.objects.filter(usuario=empleado['correo'].split('@')[0]).exists():
+                    continue
+
+                # Crea el empleado en POS
+                EmpleadoPos.objects.create(
+                    nombre=f"{empleado['nombre']} {empleado['apellidos']}",
+                    usuario=empleado['correo'].split('@')[0],
+                    contrasenia=empleado['rfc'],  # Asumiendo RFC como contraseña
+                    telefono=empleado['numero'],
+                    caja=0,  # Ajusta según tu lógica
+                    rol=rol_pos,
+                    idsucursal=sucursal_pos,
+                )
+
+                empleados_importados += 1
+            else:
+                print(f"Empleado inesperado: {empleado}")
+
+        return JsonResponse({'message': f"Importación completada. Empleados importados: {empleados_importados}"}, status=201)
+
+    except requests.RequestException as e:
+        return JsonResponse({'error': f"Error al conectar con RRHH: {str(e)}"}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': f"Error inesperado: {str(e)}"}, status=500)
+
 @csrf_exempt
 def post_producto(request):
     if request.method == 'POST':
         try:
-            # Extraer datos directamente desde request.POST y request.FILES
-            Nombre = request.POST.get('nombre')
-            Precio = float(request.POST.get('precio_unitario'))  # Convertir a float
-            Descuento = int(request.POST.get('descuento'))       # Convertir a entero
-            Stock = int(request.POST.get('stock'))               # Convertir a entero
-            Descripcion = request.POST.get('descripcion')
-            Sucursal_id = request.POST.get('sucursal')
-            
-            # Extraer el archivo de imagen desde request.FILES
-            imagen_producto = request.FILES.get('imagen')
+            sincronizar_sucursales()
+            sucursal_id = int(request.POST.get('sucursal'))
 
-            # Verificar que la sucursal existe
-            sucursal_obj = Sucursal.objects.filter(id=Sucursal_id).first()
-            if not sucursal_obj:
-                return JsonResponse({'error': 'Sucursal no encontrada'}, status=400)
+            # Validar que la sucursal exista en POS
+            if not Sucursal.objects.filter(id=sucursal_id).exists():
+                return JsonResponse({'error': 'La sucursal seleccionada no es válida.'}, status=400)
 
-            # Crear el producto
             Producto.objects.create(
-                nombre=Nombre, 
-                precio_unitario=Precio, 
-                descuento=Descuento, 
-                stock=Stock, 
-                descripcion=Descripcion, 
-                sucursal=sucursal_obj,
-                imagen=imagen_producto
+                nombre=request.POST.get('nombre'),
+                precio_unitario=float(request.POST.get('precio_unitario')),
+                descuento=int(request.POST.get('descuento')),
+                stock=int(request.POST.get('stock')),
+                descripcion=request.POST.get('descripcion'),
+                sucursal_id=sucursal_id,
+                imagen=request.FILES.get('imagen')
             )
-            
+
             return JsonResponse({'message': 'Producto agregado con éxito'})
-        
-        except ValueError as e:
-            return JsonResponse({'error': 'Error en los tipos de datos: ' + str(e)}, status=400)
-        
         except Exception as e:
-            print(e)
             return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 @csrf_exempt
 def edit_producto(request, producto_id):
@@ -146,6 +230,7 @@ def get_ventasRealizadas(request):
 def realizar_venta(request):
     if request.method == 'POST':
         try:
+            print("Datos recibidos:", request.body)
             data = json.loads(request.body)
 
             # Verificación de campos
@@ -213,3 +298,33 @@ def api_products(request):
     else:
         data = {'no tiene': "productos"} 
     return JsonResponse(data)
+
+# Parte para generar el vouncher 
+def generar_voucher(request, venta_id):
+    try:
+        venta = Venta.objects.get(id=venta_id)
+        
+        # Crear una respuesta HTTP con el tipo de contenido PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="voucher_{venta_id}.pdf"'
+
+        # Crear el objeto canvas para generar el PDF
+        p = canvas.Canvas(response, pagesize=letter)
+        width, height = letter
+
+        # Agregar detalles al PDF (aquí puedes personalizar más)
+        p.setFont("Helvetica", 12)
+        p.drawString(100, height - 100, f"Voucher de Venta No. {venta_id}")
+        p.drawString(100, height - 120, f"Empleado: {venta.empleado.nombre}")
+        p.drawString(100, height - 140, f"Sucursal: {venta.sucursal.nombre}")
+        p.drawString(100, height - 160, f"Descripción: {venta.descripcion}")
+        p.drawString(100, height - 180, f"Total: {venta.total}")
+        p.drawString(100, height - 200, f"Fecha: {venta.fecha}")
+
+        p.showPage()  # Finalizar la página
+        p.save()  # Guardar el PDF
+
+        return response
+
+    except Venta.DoesNotExist:
+        return HttpResponse("Venta no encontrada", status=404)

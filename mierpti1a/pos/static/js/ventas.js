@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let tablaVacia = true;
     let totalSubtotal = 0;
 
+    const empleado = JSON.parse(localStorage.getItem('empleado'));
+    document.getElementById("Empleado").innerText= "Empleado: "+empleado.nombre;
+    document.getElementById("establecimiento").innerText = "Sucursal: "+empleado.nombre_sucursal;
+
 
      function getCSRFToken() {
         let cookieValue = null;
@@ -188,31 +192,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Confirmar venta al hacer clic en "Confirmar venta" en el modal
     document.getElementById("confirmarVentaBtn").addEventListener("click", async function() {
         const productosVendidos = obtenerProductosDeTabla();
-
+    
         if (productosVendidos.length === 0) {
             alert("No hay productos para cobrar");
             return;
         }
-
+    
         const descripcion = productosVendidos.map(producto => producto.nombre).join(", ");
         const totalVenta = parseFloat(document.getElementById("totalGeneral").textContent);
-
-
+    
+        // Recuperar el empleado desde localStorage
+        const empleado = JSON.parse(localStorage.getItem('empleado'));
+        if (!empleado) {
+            alert("No se encontró información del empleado. Por favor, inicia sesión nuevamente.");
+            return;
+        }
+    
+        // Construir los datos de la venta
         const ventaData = {
             descripcion: descripcion,
             total: totalVenta,
-            empleado_id: 1,  // Cambiar esto para obtener el id del Usuario que esta incisiado y
-            sucursal_id: 1,  // cambiar la sucursal donde esta el usuario.
+            empleado_id: empleado.id,   // ID del empleado
+            sucursal_id: empleado.sucursal, // ID de la sucursal asignada al empleado
             fecha: new Date().toISOString()
         };
-
+    
         console.log("Datos de venta a enviar:", ventaData);
-
+    
         try {
-            const response = await fetch("/pos/venta/realizar_venta/", {
+            const response = await fetch("realizar_venta/", {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCSRFToken(),
@@ -221,13 +231,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(ventaData),
                 credentials: 'same-origin',
             });
-
+    
             if (response.ok) {
                 alert("Venta registrada exitosamente");
                 limpiarTabla();
                 totalSubtotal = 0;
                 actualizarTotales();
-
+    
                 // Ocultar el modal antes de recargar
                 const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacionVenta'));
                 modal.hide();
@@ -240,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al realizar la venta:", error);
         }
     });
+    
 
     function limpiarTabla() {
         const tbody = document.querySelector("#tblVentas tbody");

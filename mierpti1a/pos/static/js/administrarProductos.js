@@ -260,7 +260,7 @@ async function agregarProducto() {
     formData.append('descuento', document.getElementById("modalDescuento").value);
     formData.append('stock', document.getElementById("modalStock").value);
     formData.append('descripcion', document.getElementById("modalDescripcion").value);
-    formData.append('sucursal', 1); // Cambia esto según sea necesario
+    formData.append('sucursal', document.getElementById("modalSelect").value); // Cambia esto según sea necesario
     formData.append('imagen', document.getElementById("modalImagen").files[0]); // Cambia aquí para obtener el archivo
 
     try {
@@ -288,7 +288,7 @@ async function agregarProducto() {
     }
 }
 
-function limpiarDatos() {
+async function limpiarDatos() {
     document.getElementById("modalId").value = "";
     document.getElementById("modalNombre").value = "";
     document.getElementById("modalPrecio").value = "";
@@ -299,7 +299,38 @@ function limpiarDatos() {
     document.getElementById("btnGuardarCambios").onclick = () => agregarProducto();
     document.getElementById("modalImagen").required = true;
     document.getElementById("modalImagen").value = "";
-    // document.getElementById("modalSucursal").value = "";  // Descomentar cuando esté listo para su uso
+    try {
+        const response = await fetch(`http://localhost:8000/RRHH/get_sucursales/`);
+        
+        // Verifica si la respuesta es válida
+        if (!response.ok) {
+            throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
+
+        const sucursales = await response.json();
+
+        // Selecciona el elemento <select> del DOM
+        const modalSelect = document.getElementById('modalSelect');
+        
+        if (!modalSelect) {
+            console.error("No se encontró el elemento select con ID 'modalSelect'");
+            return;
+        }
+
+        // Limpia las opciones actuales del <select>
+        modalSelect.innerHTML = '<option value="" disabled selected>Seleccione una sucursal</option>';
+
+        // Recorre las sucursales y agrégalas como opciones al <select>
+        sucursales.sucursales.forEach(sucursal => {
+            const option = document.createElement('option');
+            option.value = sucursal.id; // Usar el ID de la sucursal como valor
+            option.textContent = sucursal.nombre; // Mostrar el nombre de la sucursal
+            modalSelect.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error al cargar las sucursales:", error);
+    }
 }
 
 function getCookie(name) {
