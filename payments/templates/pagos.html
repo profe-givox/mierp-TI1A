@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Pago</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/pagos.css' %}">
+ 
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Formulario de Pago</h2>
+        <form id="paymentForm">
+            {% csrf_token %}
+            <!-- Campo oculto para el ID del cliente -->
+            <input type="text" id="clientId" name="clientId" class="hidden" value="{{ user.id }}">
+
+            <!-- Campo para el monto -->
+            <div class="mb-3">
+                <label for="amount" class="form-label">Monto</label>
+                <input type="number" class="form-control" id="amount" name="amount" value="{{ amount }}" required readonly >
+            </div>
+
+            <!-- Selección del tipo de pago -->
+            <div class="mb-3">
+                <label for="paymentType" class="form-label">Tipo de Pago</label>
+                <select class="form-select" id="paymentType" name="paymentType" required>
+                    <option value="">Seleccione un tipo de pago</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Paypal">PayPal</option>
+                    <option value="Vale">Vale</option>
+                </select>
+            </div>
+
+            <!-- Campos específicos para Tarjeta -->
+            <div id="cardFields" class="hidden">
+                <div class="mb-3">
+                    <label for="cardHolder" class="form-label">Nombre del Titular</label>
+                    <input type="text" class="form-control" id="cardHolder" name="cardHolder">
+                </div>
+                <div class="mb-3">
+                    <label for="cardNumber" class="form-label">Número de Tarjeta</label>
+                    <input type="text" class="form-control" id="cardNumber" name="cardNumber" maxlength="16">
+                </div>
+                <div class="mb-3">
+                    <label for="expiryDate" class="form-label">Fecha de Vencimiento</label>
+                    <input type="month" class="form-control" id="expiryDate" name="expiryDate">
+                </div>
+                <div class="mb-3">
+                    <label for="cvv" class="form-label">CVV</label>
+                    <input type="text" class="form-control" id="cvv" name="cvv" maxlength="3">
+                </div>
+            </div>
+
+            <!-- Campos específicos para PayPal -->
+            <div id="paypalFields" class="hidden">
+                <div class="mb-3">
+                    <label for="paypalHolder" class="form-label">Nombre del Titular</label>
+                    <input type="text" class="form-control" id="paypalHolder" name="paypalHolder">
+                </div>
+                <div class="mb-3">
+                    <label for="paypalEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="paypalEmail" name="paypalEmail">
+                </div>
+            </div>
+
+            <!-- Campos específicos para Vale -->
+            <div id="voucherFields" class="hidden">
+                <div class="mb-3">
+                    <label for="voucherNumber" class="form-label">Número de Vale</label>
+                    <input type="text" class="form-control" id="voucherNumber" name="voucherNumber">
+                </div>
+            </div>
+            <button id="btnVolver"  class="btn btn-outline-secondary">Volver</button>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'scripts/pagos.js' %}"></script>
+
+</body>
+</html>

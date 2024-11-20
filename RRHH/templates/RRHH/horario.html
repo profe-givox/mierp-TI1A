@@ -1,0 +1,37 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'RRHH/style.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row main-container">
+        <!-- Contenedor del Formulario -->
+        <div class="col-md-3 main-content text-center">
+            <div class="login_form">
+                <h2>Registrar entrada y salida</h2>
+                <form method="post" class="form-group">
+                    {% csrf_token %}
+                    <input type="text" name="username" id="username" class="form__input" placeholder="Folio Empleado">
+                    <input type="password" name="password" id="password" class="form__input" placeholder="Contraseña">
+                    <div class="btn-container">
+                        <input type="button" value="Entrada" class="btn" id="entrada-btn">
+                        <input type="button" value="Salida" class="btn" id="salida-btn">
+                    </div>
+                </form>
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                
+                
+            </div>
+        </div>
+
+        <!-- Contenedor de los Slots -->
+        <div class="col-md-9 employee-slots">
+            <h2>Empleados Registrados</h2>
+            <div class="slots-container" id="slots-container">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'RRHH/js/horario.js' %}"></script>
+{% endblock %}

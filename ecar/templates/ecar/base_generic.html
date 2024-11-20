@@ -1,0 +1,41 @@
+<!-- ProyectoDjango/mierpti1a/templates/base_generic.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Login{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            color: #333;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Inicio de sesión</h1>
+        <hr>
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Aquí se mostrará el contenido de cada plantilla específica -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <hr>
+        <p>&copy; 2024 - Proyecto Django</p>
+    </footer>
+</body>
+</html>
