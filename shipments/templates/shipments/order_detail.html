@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Pedido</title>
+    <style>
+        /* Estilo similar a Amazon */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #FF9900;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #FF9900;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+            display: none; /* Ocultar mapa si hay errores */
+        }
+        #map-error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #FF9900;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Detalles del Pedido</h2>
+        <p><strong>ID del Pedido:</strong> {{ order.id }}</p>
+        <p><strong>Estado:</strong> {{ order.get_status_display }}</p>
+        <p><strong>Fecha de Creación:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+        <p><strong>Total del Pedido:</strong> ${{ total_pedido }}</p>
+
+        <!-- Tabla de productos -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Descuento</th>
+                    <th>Precio Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr>
+                    <td>{{ detalle.nombre }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>${{ detalle.precio_unitario }}</td>
+                    <td>{{ detalle.descuento }}%</td>
+                    <td>${{ detalle.precio_con_descuento }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Mapa -->
+        <div id="map"></div>
+        <p id="map-error"></p>
+
+        <a href="{% url 'shipments:order_list' %}" class="button">Volver a la lista de pedidos</a>
+    </div>
+
+    <!-- Google Maps Script -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_tYUieb85dere5xXpZvN3WKRzZjpLPE4&callback=initMap" async defer></script>
+    <script>
+        function initMap() {
+            const origin = { lat: 20.1375, lng: -101.1807 }; // Centro de Uriangato
+            const destinationLat = parseFloat("{{ latitude|default:'' }}");
+            const destinationLng = parseFloat("{{ longitude|default:'' }}");
+
+            const mapError = document.getElementById("map-error");
+            const mapDiv = document.getElementById("map");
+
+            if (isNaN(destinationLat) || isNaN(destinationLng)) {
+                mapError.textContent = "Error: No se pudieron obtener las coordenadas del destino.";
+                console.error("Coordenadas de destino inválidas.");
+                return;
+            }
+
+            // Mostrar el mapa
+            mapDiv.style.display = "block";
+            const destination = { lat: destinationLat, lng: destinationLng };
+            const map = new google.maps.Map(mapDiv, {
+                zoom: 13,
+                center: origin,
+            });
+
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+
+            directionsService.route(
+                {
+                    origin: origin,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                },
+                function (response, status) {
+                    if (status === google.maps.DirectionsStatus.OK) {
+                        directionsRenderer.setDirections(response);
+                    } else {
+                        mapError.textContent = "Error al generar la ruta en el mapa.";
+                        console.error("Error al mostrar la ruta:", status);
+                    }
+                }
+            );
+        }
+    </script>
+</body>
+</html>

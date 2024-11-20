@@ -1,0 +1,10 @@
+<h2>Actualizar Pedido #{{ order.id }}</h2>
+{% if not user.is_superuser and order.status != 'pending' %}
+    <p style="color: red;">No tienes permiso para editar este pedido porque su estado no es "Pendiente".</p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar cambios</button>
+    </form>
+{% endif %}

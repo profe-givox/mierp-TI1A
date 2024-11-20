@@ -1,0 +1,63 @@
+<!-- shipments/templates/shipments/cancel_order_confirm.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancelar Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        h2 {
+            color: #f44336;
+        }
+        p {
+            margin: 20px 0;
+        }
+        button, a {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button {
+            background-color: #f44336;
+            color: white;
+        }
+        button:hover {
+            background-color: #d32f2f;
+        }
+        a {
+            background-color: #bbb;
+            color: white;
+        }
+        a:hover {
+            background-color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cancelar Pedido #{{ orden.id }}</h2>
+        <p>¿Estás seguro de que deseas cancelar este pedido?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Sí, Cancelar</button>
+            <a href="{% url 'shipments:order_list' %}">No, Volver</a>
+        </form>
+    </div>
+</body>
+</html>
