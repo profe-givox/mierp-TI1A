@@ -9,7 +9,9 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from pos.models import Empleado as EmpleadoPos
+from datetime import datetime
 from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 
@@ -221,10 +223,20 @@ def borrar_producto(request, producto_id):
 def ventasRealizadas(request):
     return render(request, 'ventasRealizadas.html')
 
-def get_ventasRealizadas(request):
+def get_ventasRealizadas(request, sucuarsalid):
     if request.method == "GET":
-        ventas = list(Venta.objects.values('empleado', 'id', 'descripcion', 'total', 'sucursal'))
-        return JsonResponse(ventas, safe=False)
+        sucursal_id = sucuarsalid
+        
+        if sucursal_id:
+            # Filtrar las ventas por la sucursal del usuario
+            ventas = list(Venta.objects.filter(sucursal_id=sucursal_id).values(
+                'empleado', 'id', 'descripcion', 'total', 'sucursal__nombre'
+            ))
+            return JsonResponse(ventas, safe=False)
+        else:
+            return JsonResponse({'error': 'El usuario no tiene una sucursal asignada.'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
     
 @csrf_exempt
 def realizar_venta(request):
@@ -328,3 +340,131 @@ def generar_voucher(request, venta_id):
 
     except Venta.DoesNotExist:
         return HttpResponse("Venta no encontrada", status=404)
+
+def generar_reporte_ventas(request):
+    try:
+        # Obtener todas las ventas
+        ventas = Venta.objects.all()
+
+        # Calcular el total neto de todas las ventas
+        total_neto = sum(venta.total for venta in ventas)
+
+        # Obtener la sucursal del reporte
+        sucursal = "Sucursal Principal"  # Cambia esta línea si tienes lógica para obtener la sucursal
+
+        # Crear una respuesta HTTP con el tipo de contenido PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="reporte_ventas.pdf"'
+
+        # Crear el objeto canvas para generar el PDF
+        p = canvas.Canvas(response, pagesize=letter)
+        width, height = letter
+
+        # Fecha y hora actual
+        fecha_actual = datetime.now()
+        fecha_formateada = fecha_actual.strftime("%d/%m/%Y %H:%M:%S")
+
+        # Dibujar el encabezado con el color verde exacto
+        verde_empresa = colors.HexColor("#006838")  # Color verde proporcionado
+        p.setFillColor(verde_empresa)
+        p.rect(0, height - 60, width, 60, fill=True, stroke=False)  # Fondo verde del encabezado
+
+        # Añadir el texto "Paraiso Rangel"
+        p.setFillColor(colors.white)
+        p.setFont("Helvetica-Bold", 20)
+        p.drawString(50, height - 40, "Paraiso Rangel")  # Texto del "botón"
+
+        # Añadir el nombre de la sucursal debajo de "Paraiso Rangel"
+        p.setFont("Helvetica", 12)
+        p.drawString(50, height - 55, f"Sucursal: {sucursal}")
+
+        # Añadir el título del reporte a la derecha
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(width - 200, height - 40, "Reporte de Ventas")  # Alineado a la derecha
+        p.setFont("Helvetica", 10)
+        p.drawString(width - 200, height - 50, f"Generado: {fecha_formateada}")
+
+        # Tabla de ventas
+        y_position = height - 120
+        p.setFont("Helvetica-Bold", 10)
+        p.setFillColor(colors.black)
+        p.drawString(50, y_position, "Empleado")
+        p.drawString(150, y_position, "Venta No")
+        p.drawString(250, y_position, "Descripción")
+        p.drawString(400, y_position, "Total")
+        p.drawString(500, y_position, "Sucursal")
+
+        # Línea debajo del encabezado
+        p.line(50, y_position - 5, 550, y_position - 5)
+
+        # Contenido de las ventas
+        p.setFont("Helvetica", 10)
+        for venta in ventas:
+            y_position -= 20
+            if y_position < 50:  # Si se queda sin espacio en la página
+                p.showPage()  # Crear una nueva página
+                y_position = height - 50  # Reiniciar posición en la nueva página
+
+                # Redibujar encabezado en la nueva página
+                p.setFillColor(verde_empresa)
+                p.rect(0, height - 60, width, 60, fill=True, stroke=False)
+                p.setFillColor(colors.white)
+                p.setFont("Helvetica-Bold", 20)
+                p.drawString(50, height - 40, "Paraiso Rangel")
+                p.setFont("Helvetica", 12)
+                p.drawString(50, height - 55, f"Sucursal: {sucursal}")
+
+                p.setFont("Helvetica-Bold", 16)
+                p.drawString(width - 200, height - 40, "Reporte de Ventas")
+                p.setFont("Helvetica", 10)
+                p.drawString(width - 200, height - 50, f"Generado: {fecha_formateada}")
+
+                # Redibujar la cabecera de la tabla
+                y_position = height - 120
+                p.setFont("Helvetica-Bold", 10)
+                p.setFillColor(colors.black)
+                p.drawString(50, y_position, "Empleado")
+                p.drawString(150, y_position, "Venta No")
+                p.drawString(250, y_position, "Descripción")
+                p.drawString(400, y_position, "Total")
+                p.drawString(500, y_position, "Sucursal")
+                p.line(50, y_position - 5, 550, y_position - 5)
+
+            # Escribir datos de la venta
+            p.drawString(50, y_position, venta.empleado.nombre)
+            p.drawString(150, y_position, str(venta.id))
+            p.drawString(250, y_position, venta.descripcion[:20])  # Cortar descripción si es muy larga
+            p.drawString(400, y_position, f"${venta.total}")
+            p.drawString(500, y_position, venta.sucursal.nombre)
+
+        # Añadir el Total Neto al final de la tabla
+        y_position -= 40
+        if y_position < 50:  # Si no hay espacio suficiente para "Total Neto"
+            p.showPage()
+            y_position = height - 50
+
+            # Redibujar encabezado en la nueva página
+            p.setFillColor(verde_empresa)
+            p.rect(0, height - 60, width, 60, fill=True, stroke=False)
+            p.setFillColor(colors.white)
+            p.setFont("Helvetica-Bold", 20)
+            p.drawString(50, height - 40, "Paraiso Rangel")
+            p.setFont("Helvetica", 12)
+            p.drawString(50, height - 55, f"Sucursal: {sucursal}")
+
+            p.setFont("Helvetica-Bold", 16)
+            p.drawString(width - 200, height - 40, "Reporte de Ventas")
+            p.setFont("Helvetica", 10)
+            p.drawString(width - 200, height - 50, f"Generado: {fecha_formateada}")
+
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(400, y_position, f"Total Neto: ${total_neto:.2f}")  # Mostrar el total neto
+
+        # Finalizar el PDF
+        p.showPage()
+        p.save()
+
+        return response
+
+    except Exception as e:
+        return HttpResponse(f"Error al generar el reporte: {str(e)}", status=500)
