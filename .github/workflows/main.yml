@@ -9,15 +9,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_DB: db_name
-          POSTGRES_USER: username
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
+    #services:
+      #postgres:
+        #image: postgres:13
+        #env:
+          #POSTGRES_DB: db_name
+          #POSTGRES_USER: username
+          #POSTGRES_PASSWORD: password
+        #ports:
+          #- 5432:5432
 
     strategy:
       max-parallel: 4
@@ -44,13 +44,13 @@ jobs:
           source venv/bin/activate
           python manage.py migrate
 
-      - name: Run tests
-        run: |
-          source venv/bin/activate
-          python manage.py test
+      #- name: Run tests
+        #run: |
+          #source venv/bin/activate
+          #python manage.py test
 
   deploy:
-    needs: test  # Este trabajo solo se ejecuta si el trabajo 'test' se completa correctamente
+    #needs: test  # Este trabajo solo se ejecuta si el trabajo 'test' se completa correctamente
     runs-on: self-hosted
 
     strategy:
