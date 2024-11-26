@@ -1,5 +1,35 @@
-// Función que maneja el envío del formulario sin recargar la página
-function handleLogin(event) {
+// Función para obtener el CSRF token desde las cookies
+function getCSRFToken() {
+    let cookieValue = null;
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith("csrftoken=")) {
+            cookieValue = decodeURIComponent(cookie.substring("csrftoken=".length));
+            break;
+        }
+    }
+    return cookieValue;
+}
+
+// Función para guardar el empleado en las cookies
+function setEmpleadoCookie(empleado) {
+    const empleadoJSON = JSON.stringify(empleado);
+    document.cookie = `empleado=${encodeURIComponent(empleadoJSON)}; path=/; max-age=3600`; // Expira en 1 hora
+}
+
+// Función para guardar el empleado en almacenamiento local y de sesión
+function saveEmpleadoInStorages(empleado) {
+    const empleadoJSON = JSON.stringify(empleado);
+    // Guardar en almacenamiento local
+    localStorage.setItem('empleado', empleadoJSON);
+    // Guardar en almacenamiento de sesión
+    sessionStorage.setItem('empleado', empleadoJSON);
+
+    console.log("Debug: Empleado guardado en localStorage y sessionStorage.");
+}
+
+document.getElementById("formLogin").addEventListener("submit", function(event) { 
     event.preventDefault();  // Evitar el envío tradicional del formulario
 
     // Obtener los valores de los campos del formulario
@@ -8,32 +38,44 @@ function handleLogin(event) {
 
     // Mostrar mensaje de carga o deshabilitar el botón
     const button = document.getElementById('btnAceptar');
-    button.textContent = 'Iniciando sesión...';
-    button.disabled = true;
 
     // Realizar la solicitud POST a la API usando fetch
     fetch('http://localhost:8000/RRHH/login/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')  // CSRF Token para la seguridad
+            'X-CSRFToken': getCSRFToken()  // CSRF Token para la seguridad
         },
         body: JSON.stringify({
             folio: folio,  // Usamos el valor del campo de usuario
-            action: 'login',
             password: password  // Usamos el valor del campo de contraseña
         })
     })
     .then(response => response.json())  // Procesar la respuesta JSON
     .then(data => {
-        if (data.status === 'success') {
-            // Si la respuesta es exitosa, redirigir al usuario
-            window.location.href = '/catalogo/'; 
+        if (data.success) {
+            // Si la respuesta es exitosa, guardar en localStorage, sessionStorage y cookies
+            console.log(data.empleado.nombre);
+
+            // Guardar en localStorage y sessionStorage
+            saveEmpleadoInStorages(data.empleado);
+
+            // Guardar en cookies
+            setEmpleadoCookie(data.empleado);
+
+            // Verificar el rol del empleado y redirigir según corresponda
+            const puesto = data.empleado.puesto.split(' ')[0];
+            if (puesto === "Administrador") {
+                console.log("Debug: Redirigiendo al CRUD de productos para administrador.");
+                window.location.href = 'http://127.0.0.1:8000/pos/productos/';
+            } else {
+                // Redirigir al usuario normal a la vista de ventas
+                window.location.href = 'venta/';
+            }
         } else {
             // Mostrar error si el login falla
-            alert('Error en el login: ' + data.message);
-            button.textContent = 'Iniciar sesión';
-            button.disabled = false;
+            alert(data.error);
+            console.log(data.empleado);
         }
     })
     .catch(error => {
@@ -43,20 +85,4 @@ function handleLogin(event) {
         button.textContent = 'Iniciar sesión';
         button.disabled = false;
     });
-}
-
-// Función para obtener el CSRF token desde las cookies
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+});

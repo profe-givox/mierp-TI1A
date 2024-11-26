@@ -51,6 +51,7 @@
                     <th>Productos</th>
                     <th>Total</th>
                     <th>Sucursal</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,13 +63,17 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch('get_ventasRealizadas/')  // Ajusta esta ruta si es necesario
+        document.addEventListener("DOMContentLoaded", function () {
+            const empleado = JSON.parse(localStorage.getItem('empleado'));
+            const sucursalId = empleado.sucursal;
+            const url = `get_ventasRealizadas/${sucursalId}/`; // Ruta ajustada con sucursal_id
+    
+            fetch(url) // Llamada a la API con el ID de la sucursal
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.querySelector("#tblVentas tbody");
                     tableBody.innerHTML = ""; // Limpiar el contenido existente
-
+    
                     if (data.length > 0) {
                         data.forEach(venta => {
                             const row = document.createElement("tr");
@@ -77,18 +82,22 @@
                                 <td>${venta.id}</td>
                                 <td>${venta.descripcion}</td>
                                 <td>${venta.total}</td>
-                                <td>${venta.sucursal}</td>
+                                <td>${venta.sucursal__nombre}</td>
+                                <td><a href="generar_voucher/${venta.id}/" class="btn btn-primary">Descargar Voucher</a></td>
                             `;
                             tableBody.appendChild(row);
                         });
                     } else {
                         const row = document.createElement("tr");
-                        row.innerHTML = `<td colspan="5">No hay ventas registradas.</td>`;
+                        row.innerHTML = `<td colspan="6">No hay ventas registradas.</td>`;
                         tableBody.appendChild(row);
                     }
                 })
                 .catch(error => console.error('Error al cargar los datos:', error));
         });
     </script>
+    <div class="text-center mt-3">
+        <a href="{% url 'reporte_ventas' %}" class="btn btn-success">Descargar Reporte PDF</a>
+    </div>  
 </body>
 </html>

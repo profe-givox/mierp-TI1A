@@ -24,7 +24,7 @@
     </nav>
 
     <div id="contenedor">
-        <form method="POST">
+        <form method="POST" id="formLogin">
             {% csrf_token %}
             <h1 id="login">Inicio de sesión</h1>
             <img id="imagenLogin" src="{% static 'img/login.png' %}" alt="Login Image">

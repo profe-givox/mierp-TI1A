@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
+from .models import *
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -64,10 +65,9 @@ class LoginAPIView(APIView):
     def post(self, request):
         data = request.data
         folio = data.get('folio')
-        action = data.get('action')
         password = data.get('password')
 
-        if not folio or not action or not password:
+        if not folio or not password:
             return Response({'success': False, 'error': 'Faltan campos requeridos'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Autenticación del usuario
@@ -81,13 +81,39 @@ class LoginAPIView(APIView):
         except Empleado.DoesNotExist:
             return Response({'success': False, 'error': 'Empleado no encontrado'}, status=status.HTTP_400_BAD_REQUEST)
 
+        print(empleado.sucursal_id)
+
         return Response({
             'success': True,
             'empleado': {
-                'puesto': empleado.puesto,
+                'id': str(empleado.id),
+                'nombre': str(empleado.nombre),
+                'apellidos': str(empleado.apellidos),
+                'sucursal': str(empleado.sucursal_id),
+                'nombre_sucursal': str(empleado.sucursal),
+                'puesto': str(empleado.puesto),
             },
         }, status=status.HTTP_200_OK)
     
     def get(self, request):
         return Response({'success': False, 'error': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+def get_sucursales(request):
+    sucursales = list(Sucursal.objects.values())
+
+    if len(sucursales) > 0:
+        data = {'message': "Success", 'sucursales': sucursales}
+    else:
+        data = {'message': "Not Found"}
+    
+    return JsonResponse(data)
+
+def get_empleados(request):
+    empleados = list(Empleado.objects.values())
+
+    if len(empleados) > 0:
+        data= {'message': "Success", 'empleados':empleados}
+    else:
+        data = {'message': "Not found"}
+    return JsonResponse(data)
 

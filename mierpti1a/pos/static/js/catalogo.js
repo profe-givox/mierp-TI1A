@@ -1,47 +1,81 @@
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
+    const staticBaseUrl = "{% static '' %}"; // Base URL para cargar imágenes
+    const sucursalSelect = document.getElementById('sucursalSelect');
+    const productosContainer = document.getElementById('productosContainer');
+
+    // Función para cargar las sucursales desde la API
+    async function cargarSucursales() {
+        try {
+            const response = await fetch('http://localhost:8000/RRHH/get_sucursales/'); // Cambia a la URL correcta en tu proyecto
+            const data = await response.json();
+
+            if (data.success) {
+                // Rellenar el select con las sucursales
+                data.sucursales.forEach(sucursal => {
+                    const option = document.createElement('option');
+                    option.value = sucursal.id; // Usar el ID de la sucursal
+                    option.textContent = sucursal.nombre; // Nombre de la sucursal
+                    sucursalSelect.appendChild(option);
+                });
+            } else {
+                console.error("Error al cargar sucursales:", data.error);
+            }
+        } catch (error) {
+            console.error("Error al cargar sucursales:", error);
+        }
+    }
+
+    // Función para cargar productos desde la API
     async function cargarProductos() {
         try {
-            // La misma shit, no funcionara hasta hacer bien la redireccion al view correcto
-            const response = await fetch('get_catalogo/');
-            const productos = await response.json();
-            mostrarProductos(productos);
+            const response = await fetch('get_catalogo/'); // Cambia a la URL correcta en tu proyecto
+            const data = await response.json();
+
+            if (data.success) {
+                mostrarProductos(data.catalogo);
+            } else {
+                console.error("Error al cargar productos:", data.error);
+            }
         } catch (error) {
             console.error("Error al cargar productos:", error);
         }
     }
+
+    // Función para mostrar productos en el contenedor
     function mostrarProductos(productos) {
-        const productosContainer = document.getElementById('productosContainer');
-        productosContainer.innerHTML = '';
-        console.log(productos);
-        productos.catalogo.forEach(producto => {
+        productosContainer.innerHTML = ''; // Limpiar contenedor
+        productos.forEach(producto => {
             const div = document.createElement('div');
             div.className = 'producto';
-            console.log(producto.imagen);
+            div.dataset.sucursal = producto.sucursal; // Asociar sucursal al producto
             const partesRuta = producto.imagen.split('/');
             const nombreArchivo = partesRuta[partesRuta.length - 1];
             const urlImagen = `${staticBaseUrl}img/${nombreArchivo}`;
-            // div.dataset.sucursal = producto.sucursal; Activarlo cuando la sucursal se active
+
             div.innerHTML = `
                 <img src="${urlImagen}" alt="${producto.nombre}">
                 <div>
                     <h3>${producto.nombre}</h3>
-                    <label id="idprod">ID: ${producto.id}</label>
-                    <label id="descripcion">${producto.descripcion}</label>
-                    <label id="stock">Stock: ${producto.stock}</label>
+                    <label>ID: ${producto.id}</label>
+                    <label>${producto.descripcion}</label>
+                    <label>Stock: ${producto.stock}</label>
                 </div>
                 <div>
-                    <input type="button" value="Ver" data-bs-toggle="modal" data-bs-target="#modal-detalles" onclick="cargarDatosModal('${producto.nombre}', ${producto.id}, ${producto.stock}, '${producto.descripcion}', '${producto.imagen}')">
+                    <input type="button" value="Ver" data-bs-toggle="modal" data-bs-target="#modal-detalles" 
+                        onclick="cargarDatosModal('${producto.nombre}', ${producto.id}, ${producto.stock}, '${producto.descripcion}', '${urlImagen}')">
                 </div>
             `;
             productosContainer.appendChild(div);
         });
     }
+
+    // Función para cargar datos en el modal
     function cargarDatosModal(Nombre, ID, Stock, Descripcion, Imagen) {
-        var nombreModal = document.getElementById("nombreModal");
-        var idModal = document.getElementById("idModal");
-        var stockModal = document.getElementById("stockModal");
-        var descripcionModal = document.getElementById("descripcionModal");
-        var imgModal = document.getElementById("imgModal");
+        const nombreModal = document.getElementById("nombreModal");
+        const idModal = document.getElementById("idModal");
+        const stockModal = document.getElementById("stockModal");
+        const descripcionModal = document.getElementById("descripcionModal");
+        const imgModal = document.getElementById("imgModal");
 
         nombreModal.textContent = Nombre;
         idModal.textContent = "ID: " + ID;
@@ -50,13 +84,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         imgModal.src = Imagen;
     }
 
+    // Función para filtrar productos por sucursal seleccionada
     function filtrarProductosPorSucursal() {
-        var select = document.getElementById('sucursalSelect');
-        var idSucursal = select.value;
-        var productos = document.querySelectorAll('.producto');
+        const idSucursal = sucursalSelect.value;
+        const productos = document.querySelectorAll('.producto');
 
-        productos.forEach(function(producto) {
-            if (idSucursal === 'all' || producto.getAttribute('data-sucursal') === idSucursal) {
+        productos.forEach(producto => {
+            if (idSucursal === 'all' || producto.dataset.sucursal === idSucursal) {
                 producto.style.display = 'flex';
             } else {
                 producto.style.display = 'none';
@@ -64,16 +98,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Puede que todos estos metodos no funcionen si no estan en su html, de ser asi, agregar una seccion script ahi y 
-    // Ponerlos, ni idea de por que no los tome si estan aca
+    // Función para buscar productos por nombre
     function filtrarProductos() {
-        var input = document.getElementById('buscar');
-        var filter = input.value.toLowerCase();
-        var productos = document.querySelectorAll('.producto');
+        const input = document.getElementById('buscar');
+        const filter = input.value.toLowerCase();
+        const productos = document.querySelectorAll('.producto');
 
-        productos.forEach(function(producto) {
-            var nombre = producto.querySelector('h3').textContent.toLowerCase();
-
+        productos.forEach(producto => {
+            const nombre = producto.querySelector('h3').textContent.toLowerCase();
             if (nombre.includes(filter)) {
                 producto.style.display = 'flex';
             } else {
@@ -81,6 +113,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    cargarProductos();
-});
 
+    // Asignar eventos a los elementos
+    sucursalSelect.addEventListener('change', filtrarProductosPorSucursal);
+
+    // Cargar sucursales y productos al cargar la página
+    await cargarSucursales();
+    await cargarProductos();
+});
