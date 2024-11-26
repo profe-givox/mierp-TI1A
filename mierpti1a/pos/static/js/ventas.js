@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Datos de venta a enviar:", ventaData);
     
         try {
-            const response = await fetch("venta/realizar_venta/", {
+            const response = await fetch("../venta/realizar_venta/", {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCSRFToken(),

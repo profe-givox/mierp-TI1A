@@ -1,4 +1,3 @@
-
 // Función para obtener el CSRF token desde las cookies
 function getCSRFToken() {
     let cookieValue = null;
@@ -11,6 +10,23 @@ function getCSRFToken() {
         }
     }
     return cookieValue;
+}
+
+// Función para guardar el empleado en las cookies
+function setEmpleadoCookie(empleado) {
+    const empleadoJSON = JSON.stringify(empleado);
+    document.cookie = `empleado=${encodeURIComponent(empleadoJSON)}; path=/; max-age=3600`; // Expira en 1 hora
+}
+
+// Función para guardar el empleado en almacenamiento local y de sesión
+function saveEmpleadoInStorages(empleado) {
+    const empleadoJSON = JSON.stringify(empleado);
+    // Guardar en almacenamiento local
+    localStorage.setItem('empleado', empleadoJSON);
+    // Guardar en almacenamiento de sesión
+    sessionStorage.setItem('empleado', empleadoJSON);
+
+    console.log("Debug: Empleado guardado en localStorage y sessionStorage.");
 }
 
 document.getElementById("formLogin").addEventListener("submit", function(event) { 
@@ -38,10 +54,24 @@ document.getElementById("formLogin").addEventListener("submit", function(event) 
     .then(response => response.json())  // Procesar la respuesta JSON
     .then(data => {
         if (data.success) {
-            // Si la respuesta es exitosa, redirigir al usuario
+            // Si la respuesta es exitosa, guardar en localStorage, sessionStorage y cookies
             console.log(data.empleado.nombre);
-            localStorage.setItem('empleado', JSON.stringify(data.empleado));
-            window.location.href = 'venta/'; 
+
+            // Guardar en localStorage y sessionStorage
+            saveEmpleadoInStorages(data.empleado);
+
+            // Guardar en cookies
+            setEmpleadoCookie(data.empleado);
+
+            // Verificar el rol del empleado y redirigir según corresponda
+            const puesto = data.empleado.puesto.split(' ')[0];
+            if (puesto === "Administrador") {
+                console.log("Debug: Redirigiendo al CRUD de productos para administrador.");
+                window.location.href = 'http://127.0.0.1:8000/pos/productos/';
+            } else {
+                // Redirigir al usuario normal a la vista de ventas
+                window.location.href = 'venta/';
+            }
         } else {
             // Mostrar error si el login falla
             alert(data.error);

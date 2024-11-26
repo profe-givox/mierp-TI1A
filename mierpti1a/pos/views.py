@@ -1,4 +1,6 @@
 from datetime import timezone
+from django.http import HttpResponseForbidden
+from urllib.parse import unquote
 import json
 from .models import *
 from django.http import JsonResponse
@@ -17,24 +19,107 @@ from django.http import HttpResponse
 
 import requests 
 
+## Funcion para verificar puesto de caja TEST1
+def verificar_acceso(view_func):
+    def wrapper(request, *args, **kwargs):
+        # Leer la cookie 'empleado'
+        empleado_json = request.COOKIES.get('empleado')
+        
+        if not empleado_json:
+            print("Debug: No se encontró la cookie 'empleado'.")
+            return HttpResponseForbidden("Acceso denegado: No se encontraron datos de empleado.")
+        
+        try:
+            # Decodificar la cookie para convertirla de formato URL
+            empleado_decoded = unquote(empleado_json)
+            print(f"Debug: Empleado decodificado: {empleado_decoded}")
+
+            # Convertir el JSON decodificado a un diccionario de Python
+            empleado = json.loads(empleado_decoded)
+            print(f"Debug: Información del empleado: {empleado}")
+        except json.JSONDecodeError:
+            print("Debug: Error al decodificar los datos del empleado.")
+            return HttpResponseForbidden("Acceso denegado: Error en los datos del empleado.")
+        
+        # Obtener y procesar el puesto del empleado
+        puesto_completo = empleado.get('puesto', '')
+        puesto = puesto_completo.split(' ')[0] if puesto_completo else None
+        print(f"Debug: Puesto completo: '{puesto_completo}', Puesto procesado: '{puesto}'")
+
+        # Asignar permisos según el rol del empleado
+        vista = view_func.__name__
+        print(f"Debug: Accediendo a la vista: {vista}")
+        
+        # Permisos para "El Patron"
+        if puesto == "El":
+            print("Debug: Acceso permitido para 'El Patron'.")
+            return view_func(request, *args, **kwargs)
+
+        # Permisos para "Caja"
+        if puesto == "Caja" and vista in ["venta"]:
+            print("Debug: Acceso permitido para empleado de Caja.")
+            return view_func(request, *args, **kwargs)
+
+        # Permisos para "Administrador"
+        if puesto == "Administrador" and vista in ["ventasRealizadas", "productos"]:
+            print("Debug: Acceso permitido para Administrador.")
+            return view_func(request, *args, **kwargs)
+
+        # Acceso denegado
+        print("Debug: Acceso denegado para el puesto actual y la vista solicitada.")
+        return HttpResponseForbidden("Acceso denegado: Usuario no autorizado para esta vista.")
+    return wrapper
+
 ###### Vista de Inicio de sesión con identificación implementada con Django y su función authenticate ######
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from urllib.parse import unquote
+import json
+
 def index(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            # Inicia sesión
             login(request, user)
+            
+            # Verificar la cookie 'empleado' para redirigir según el rol
+            empleado_json = request.COOKIES.get('empleado')
+            if empleado_json:
+                try:
+                    # Decodificar y cargar los datos del empleado
+                    empleado_decoded = unquote(empleado_json)
+                    empleado = json.loads(empleado_decoded)
+                    puesto_completo = empleado.get('puesto', '')
+                    puesto = puesto_completo.split(' ')[0] if puesto_completo else None
+                    
+                    print(f"Debug: Usuario autenticado con el rol: {puesto}")
+                    
+                    # Redirigir a la vista correspondiente según el rol
+                    if puesto == "Administrador":
+                        print("Debug: Redirigiendo al CRUD de productos para administrador.")
+                        return redirect('http://127.0.0.1:8000/pos/productos/')
+                except json.JSONDecodeError:
+                    print("Debug: Error al decodificar los datos del empleado.")
+                    messages.error(request, "Error al procesar los datos del empleado.")
+            
+            # Redirigir a la vista de ventas por defecto
             return redirect('ventas')
         else:
+            # Mensaje de error para credenciales incorrectas
             messages.error(request, 'Credenciales incorrectas. Inténtalo de nuevo.')
 
     return render(request, 'index.html')  # O 'pos/index.html' si está dentro de una subcarpeta
 
+
 ######## Vistas para el funcionamiento de productos ########
+@verificar_acceso
 def productos(request):
+    print("Debug: Usuario accediendo a la vista de CRUD de productos.")
     productos = Producto.objects.all()
     return render(request, 'administrarProductos.html', {'productos': productos})
 
@@ -220,7 +305,9 @@ def borrar_producto(request, producto_id):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 #### Vistas para el funcionamiento de Ventas Realizadas ####
+@verificar_acceso
 def ventasRealizadas(request):
+    print("Debug: Usuario accediendo a la vista de ventas realizadas.")
     return render(request, 'ventasRealizadas.html')
 
 def get_ventasRealizadas(request, sucuarsalid):
@@ -294,7 +381,9 @@ def get_catalogo(request):
     return JsonResponse(data)
 
 ###### Realizar Ventas ###### 
+@verificar_acceso
 def venta(request):
+    print("Debug: Usuario accediendo a la vista de ventas.")
     return render(request, 'ventas.html')
 
 # Control de Usuarios 
