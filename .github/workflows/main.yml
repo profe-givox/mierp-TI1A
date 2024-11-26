@@ -23,7 +23,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.11.2]
-        architecture: ['arm64']
+        architecture: [arm64]
 
     steps:
       - name: Checkout
@@ -58,7 +58,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.11.2]
-        architecture: ['arm64']
+        architecture: [arm64]
         
     steps:
       - name: Checkout main branch
@@ -67,7 +67,7 @@ jobs:
           clean: false
       
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
