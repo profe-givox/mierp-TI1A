@@ -1,87 +1,41 @@
-name: CI CD Django
+name: Setup Python on Raspberry Pi
 
-on:
-  push:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    #services:
-      #postgres:
-        #image: postgres:13
-        #env:
-          #POSTGRES_DB: db_name
-          #POSTGRES_USER: username
-          #POSTGRES_PASSWORD: password
-        #ports:
-          #- 5432:5432
-
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.11.2]
-        architecture: [arm64]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-
-      - name: Run migrations
-        run: |
-          source venv/bin/activate
-          python manage.py migrate
-
-      #- name: Run tests
-        #run: |
-          #source venv/bin/activate
-          #python manage.py test
-
-  deploy:
-    #needs: test  # Este trabajo solo se ejecuta si el trabajo 'test' se completa correctamente
+  build:
     runs-on: self-hosted
 
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.11.2]
-        architecture: [arm64]
-        
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v3
-        with:
-          clean: false
-      
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
+    - uses: actions/checkout@v2
 
-      - name: Install dependencies # Se instala gunicorn pero debiese estar dentro de requiriments.txt
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          pip install gunicorn
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget build-essential libssl-dev zlib1g-dev libbz2-dev \
+        libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev \
+        libxmlsec1-dev libffi-dev liblzma-dev
 
-      - name: Run migrations
-        run: |
-          source venv/bin/activate
-          python manage.py migrate
+    - name: Download and Install Python
+      run: |
+        wget https://www.python.org/ftp/python/3.11.2/Python-3.11.2.tgz
+        tar -xf Python-3.11.2.tgz
+        cd Python-3.11.2
+        ./configure --enable-optimizations
+        make -j $(nproc)
+        sudo make altinstall
 
-      - name: Reset supervisor
-        run: sudo service supervisor restart
+    - name: Set up Virtual Environment
+      run: |
+        python3.11 -m venv venv
+        source venv/bin/activate
+
+    - name: Install Django
+      run: |
+        source venv/bin/activate
+        pip install django
+
+    - name: Verify Installation
+      run: |
+        source venv/bin/activate
+        python -m django --version
