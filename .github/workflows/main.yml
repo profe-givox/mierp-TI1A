@@ -1,0 +1,85 @@
+name: CI CD Django
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    #services:
+      #postgres:
+        #image: postgres:13
+        #env:
+          #POSTGRES_DB: db_name
+          #POSTGRES_USER: username
+          #POSTGRES_PASSWORD: password
+        #ports:
+          #- 5432:5432
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.11.2]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Run migrations
+        run: |
+          source venv/bin/activate
+          python manage.py migrate
+
+      #- name: Run tests
+        #run: |
+          #source venv/bin/activate
+          #python manage.py test
+
+  deploy:
+    #needs: test  # Este trabajo solo se ejecuta si el trabajo 'test' se completa correctamente
+    runs-on: self-hosted
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.11.2]
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          clean: false
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies # Se instala gunicorn pero debiese estar dentro de requiriments.txt
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pip install gunicorn
+
+      - name: Run migrations
+        run: |
+          source venv/bin/activate
+          python manage.py migrate
+
+      - name: Reset supervisor
+        run: sudo service supervisor restart

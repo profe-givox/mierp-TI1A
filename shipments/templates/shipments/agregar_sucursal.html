@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agregar Sucursal</title>
+    <style>
+        /* Estilo similar al de Amazon */
+
+        .navbar {
+            display: flex;
+            justify-content: flex-start; /* Alinea los elementos a la izquierda */
+            background-color: #232f3e;
+            padding: 10px;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 5px;
+            background-color: #ffa41c;
+        }
+        .navbar a:hover {
+            background-color: #f79400;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #ffa41c;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #f79400;
+        }
+        #map {
+            height: 400px;
+            margin-bottom: 15px;
+        }
+        .search-bar {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/shipments/sucursales/">Lista de Sucursales</a>
+        <a href="/shipments/orders/">Lista de Órdenes</a>
+    </div>
+
+    <div class="container">
+        <h1>Agregar Sucursal</h1>
+        <input id="pac-input" class="search-bar" type="text" placeholder="Buscar en el mapa">
+        <div id="map"></div>
+        <form id="agregarSucursalForm">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion" name="direccion" required>
+
+            <label for="ciudad">Ciudad:</label>
+            <input type="text" id="ciudad" name="ciudad" required>
+
+            <label for="estado">Estado:</label>
+            <input type="text" id="estado" name="estado" required>
+
+            <label for="latitud">Latitud:</label>
+            <input type="number" id="latitud" name="latitud" step="any" required>
+
+            <label for="longitud">Longitud:</label>
+            <input type="number" id="longitud" name="longitud" step="any" required>
+
+            <button type="submit">Agregar Sucursal</button>
+        </form>
+    </div>
+
+    <script>
+        let map, marker, autocomplete;
+
+        function initMap() {
+            const initialPosition = { lat: 20.1406, lng: -101.1812 };
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: initialPosition,
+                zoom: 13,
+            });
+
+            const input = document.getElementById('pac-input');
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+            autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo('bounds', map);
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry) return;
+
+                map.setCenter(place.geometry.location);
+                map.setZoom(15);
+
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+                document.getElementById('latitud').value = lat;
+                document.getElementById('longitud').value = lng;
+
+                if (marker) {
+                    marker.setPosition(place.geometry.location);
+                } else {
+                    marker = new google.maps.Marker({
+                        map,
+                        position: place.geometry.location,
+                    });
+                }
+
+                document.getElementById('direccion').value = place.formatted_address || '';
+                const addressComponents = place.address_components || [];
+                addressComponents.forEach(component => {
+                    if (component.types.includes('locality')) {
+                        document.getElementById('ciudad').value = component.long_name;
+                    }
+                    if (component.types.includes('administrative_area_level_1')) {
+                        document.getElementById('estado').value = component.long_name;
+                    }
+                });
+            });
+
+            map.addListener('click', (event) => {
+                const lat = event.latLng.lat();
+                const lng = event.latLng.lng();
+                document.getElementById('latitud').value = lat;
+                document.getElementById('longitud').value = lng;
+
+                if (marker) {
+                    marker.setPosition(event.latLng);
+                } else {
+                    marker = new google.maps.Marker({
+                        position: event.latLng,
+                        map: map
+                    });
+                }
+
+                // Obtener la dirección mediante el servicio de Geocoding
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: event.latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        document.getElementById('direccion').value = results[0].formatted_address;
+                        results[0].address_components.forEach(component => {
+                            if (component.types.includes('locality')) {
+                                document.getElementById('ciudad').value = component.long_name;
+                            }
+                            if (component.types.includes('administrative_area_level_1')) {
+                                document.getElementById('estado').value = component.long_name;
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        document.getElementById('agregarSucursalForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                direccion: document.getElementById('direccion').value,
+                ciudad: document.getElementById('ciudad').value,
+                estado: document.getElementById('estado').value,
+                latitud: parseFloat(document.getElementById('latitud').value),
+                longitud: parseFloat(document.getElementById('longitud').value)
+            };
+
+            fetch('/shipments/sucursales/agregar/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Sucursal agregada con éxito');
+                window.location.href = '/shipments/sucursales/';
+            })
+            .catch(error => alert('Error al agregar la sucursal'));
+        });
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_tYUieb85dere5xXpZvN3WKRzZjpLPE4&libraries=places&callback=initMap"></script>
+</body>
+</html>

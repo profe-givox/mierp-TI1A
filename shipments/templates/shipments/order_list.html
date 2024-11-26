@@ -1,0 +1,128 @@
+<!-- shipments/templates/shipments/order_list.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Pedidos</title>
+    <style>
+        /* Estilo de la barra de navegación */
+        .navbar {
+            display: flex;
+            justify-content: flex-start; /* Alinea los elementos a la izquierda */
+            background-color: #232f3e;
+            padding: 10px;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 5px;
+            background-color: #ffa41c;
+        }
+        .navbar a:hover {
+            background-color: #f79400;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #FF9900;
+            color: white;
+        }
+        a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+        .btn-details {
+            background-color: #0073e6;
+            color: white;
+        }
+        .btn-change-status {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-cancel {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    
+    <!-- Barra de navegación -->
+    <div class="navbar">
+        <a href="{% url 'shipments:order_create' %}">Crear Pedido</a>
+        <a href="{% url 'catalogo' %}">Volver al Catálogo</a>
+        {% if user.is_superuser %}
+            <a href="{% url 'shipments:agregar_sucursal' %}">Agregar Sucursal</a>
+            <a href="{% url 'shipments:listar_sucursales' %}">Ver Sucursales</a>
+        {% endif %}
+    </div>
+
+    <h1 style="text-align: center; color: #FF9900;">Gestión de Pedidos</h1>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- Tabla de pedidos -->
+    <table>
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Total</th>
+                <th>Estado</th>
+                {% if user.is_superuser %}<th>ID del Cliente</th>{% endif %}
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for orden in ordenes %}
+            <tr>
+                <td>Orden #{{ orden.id }}</td>
+                <td>${{ orden.total }}</td>
+                <td>{{ orden.get_status_display }}</td>
+                {% if user.is_superuser %}
+                <td>{{ orden.cliente_id }}</td>
+                {% endif %}
+                <td>
+                    <!-- Botón para ver detalles -->
+                    <a href="{% url 'shipments:order_detail' orden.id %}" class="btn-details">Ver Detalles</a>
+                    
+                    <!-- Botón para cambiar estado (solo admins) -->
+                    {% if user.is_superuser %}
+                        <a href="{% url 'shipments:change_order_status' orden.id %}" class="btn-change-status">Cambiar Estado</a>
+                    {% endif %}
+                    
+                    <!-- Botón para cancelar pedido -->
+                    {% if user.is_superuser or orden.status == 'PENDIENTE' %}
+                        <a href="{% url 'shipments:cancel_order' orden.id %}" class="btn-cancel">Cancelar</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <footer style="text-align: center; padding: 10px; margin-top: 20px; color: #666;">
+        © 2024 - Proyecto Django
+    </footer>
+</body>
+</html>
