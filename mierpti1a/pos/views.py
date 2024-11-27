@@ -548,8 +548,6 @@ def generar_reporte_ventas(request):
 
         p.setFont("Helvetica-Bold", 12)
         p.drawString(400, y_position, f"Total Neto: ${total_neto:.2f}")  # Mostrar el total neto
-
-        # Finalizar el PDF
         p.showPage()
         p.save()
 
