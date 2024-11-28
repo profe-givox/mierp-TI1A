@@ -1,0 +1,76 @@
+<!-- shipments/templates/shipments/change_order_status.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cambiar Estado del Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #FF9900;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .back-link a {
+            color: #0073e6;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cambiar Estado del Pedido #{{ orden.id }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.status.label_tag }}
+                {{ form.status }}
+            </div>
+            <button type="submit">Actualizar Estado</button>
+        </form>
+        <div class="back-link">
+            <a href="{% url 'shipments:order_list' %}">Volver a la lista de pedidos</a>
+        </div>
+    </div>
+</body>
+</html>

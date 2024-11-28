@@ -19,7 +19,7 @@
             {% for producto in productos %}
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 200px; width: auto;">
+                    <img src="/static/img/{{ producto.imagen }}" class="card-img-top img-thumbnail" alt="{{ producto.nombre }}" style="height: 200px; width: auto;">
                     <div class="card-body">
                         <h5 class="card-title">{{ producto.nombre }}</h5>
                         <p class="card-text" data-full-text="{{ producto.descripcion }}">
@@ -27,10 +27,13 @@
                         </p>
                         {% if producto.descuento > 0 %}
                             <p class="card-text text-danger"><strong>Descuento: {{ producto.descuento }}%</strong></p>
-                            <p class="card-text"><strong>Precio Original: <del>${{ producto.precio }}</del></strong></p>
-                            <p class="card-text"><strong>Precio con Descuento: ${{ producto.precio_con_descuento }}</strong></p>
+                            <p class="card-text"><strong>Precio Original: <del>${{ producto.precio_unitario }}</del></strong></p>
+                            <p class="card-text"><strong>Precio con Descuento: ${{ producto.precio_con_descuento|floatformat:2 }}</strong></p>
+
                         {% else %}
-                            <p class="card-text"><strong>${{ producto.precio }}</strong></p>
+                            <p class="card-text"><strong>${{ producto.precio_unitario }}</strong></p>
+                            <p class="card-text"><strong>‎ </strong></p>
+                            <p class="card-text"><strong>‎ </strong></p>
                         {% endif %}
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-primary btn-sm">

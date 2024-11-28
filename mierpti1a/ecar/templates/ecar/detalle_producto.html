@@ -1,7 +1,6 @@
 {% extends 'ecar/base.html' %}
 {% block content %}
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,11 +14,13 @@
 <body>
     <div class="container">
         <h1>{{ producto.nombre }}</h1>
-        <img src="{{ producto.imagen.url }}" class="img-fluid" alt="{{ producto.nombre }}">
+        <img src="{% static 'img/' %}{{ producto.imagen }}" class="img-fluid" alt="{{ producto.nombre }}">
         <p>{{ producto.descripcion }}</p>
-        <p><strong>Precio: ${{ producto.precio }}</strong></p>
-        <p>Descuento: {{ producto.descuento }}%</p>
-        <p><strong>Precio con Descuento: ${{ producto.precio_con_descuento }}</strong></p>
+        <p><strong>Precio: ${{ producto.precio_unitario }}</strong></p>
+        {% if producto.descuento > 0 %}
+            <p class="text-danger">Descuento: {{ producto.descuento }}%</p>
+            <p><strong>Precio con Descuento: ${{ producto.precio_con_descuento|floatformat:2 }}</strong></p>
+        {% endif %}
         <p>Stock: {{ producto.stock }}</p>
         <a href="{% url 'catalogo' %}" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-arrow-left"></i> Volver

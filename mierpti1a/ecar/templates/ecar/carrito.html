@@ -28,9 +28,9 @@
                 {% for item in productos_carrito %}
                 <tr>
                     <td>
-                        <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="img-thumbnail" style="width: 100px; height: auto;">
+                        <img src="{% static 'img/' %}{{ item.imagen }}" alt="{{ item.nombre }}" class="img-thumbnail" style="width: 100px; height: auto;">
                     </td>
-                    <td>{{ item.producto.nombre }}</td>
+                    <td>{{ item.nombre }}</td>
                     <td>
                         <div class="input-group">
                             <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id }}" data-action="decrease">-</button>
@@ -39,11 +39,11 @@
                         </div>
                     </td>
                     <td>
-                        {% if item.producto.descuento > 0 %}
-                            <del>${{ item.producto.precio }}</del><br>
-                            <strong>${{ item.producto.precio_con_descuento }}</strong>
+                        {% if item.precio_unitario > item.precio_con_descuento %}
+                            <del>${{ item.precio_unitario|floatformat:2 }}</del><br>
+                            <strong>${{ item.precio_con_descuento|floatformat:2 }}</strong>
                         {% else %}
-                            ${{ item.producto.precio }}
+                            ${{ item.precio_unitario|floatformat:2 }}
                         {% endif %}
                     </td>
                     <td>
@@ -57,14 +57,20 @@
                 {% endfor %}
                 <tr>
                     <td colspan="4"><strong>Total</strong></td>
-                    <td><strong>${{ total }}</strong></td>
+                    <td><strong>${{ total|floatformat:2 }}</strong></td>
                 </tr>
             </tbody>
         </table>
 
         <div class="d-flex justify-content-between">
             <a href="{% url 'catalogo' %}" class="btn btn-primary">Seguir comprando</a>
-            <a href="#" class="btn btn-success">Pagar</a>
+            <form method="post" action="/payments/pagos/">
+                {% csrf_token %}
+                <input type="hidden" name="amount" id="amount" value="{{ total|floatformat:2 }}">
+                <button type="submit" class="btn btn-success">Pagar</button>
+            </form>
+            
+            
         </div>
     </div>
 
@@ -113,6 +119,6 @@
             });
         });
     </script>
-{% endblock %}
 </body>
 </html>
+{% endblock %}

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (clienteId) {
             const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || document.getElementById('csrfToken')?.value;
             debugger
-            fetch('/api/pagos-por-cliente/', {
+            fetch('/payments/api/pagos-por-cliente/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

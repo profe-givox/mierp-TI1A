@@ -46,7 +46,7 @@
       <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
         <div class="container-fluid">
           <!-- Logo (texto) -->
-          <a class="navbar-brand" href="#">Tiendita</a>
+          <a class="navbar-brand" href="{% url 'catalogo' %}">Tiendita</a>
           
           <!-- Botón para móviles -->
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,10 +62,11 @@
               </button>
             </form>
     
+            
             <!-- Pedidos -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a class="nav-link" href="#">Pedidos</a>
+                <a class="nav-link" href="{% url 'shipments:order_list' %}">Pedidos</a>
               </li>
             </ul>
     
@@ -82,7 +83,7 @@
             <ul class="navbar-nav">
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <img src="https://cdn.discordapp.com/attachments/932697148481503312/1302064963032059925/464487294_1243297606991688_6814852431220467341_n.png?ex=67276abe&is=6726193e&hm=e2db6757f820771d6445ddd86b094354e734227c211a0075cbfc3a7ef4437739&" alt="Foto de usuario" class="rounded-circle" width="30" height="30" />
+                  <img src="https://cdn.discordapp.com/attachments/932697148481503312/1307694740996882524/6c1e956b-92ba-4be7-8c28-2d1e1197eb65_HFEMhLp.jpg?ex=673b3d22&is=6739eba2&hm=e3ef9a70bbbbefda9e2b7f07aa67234637478e00d8683fe0da1b4d85c7452d3d&" alt="Foto de usuario" class="rounded-circle" width="30" height="30" />
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                   <li><a class="dropdown-item" href="{% url 'logout' %}?next=/login/">Cerrar sesión</a></li>

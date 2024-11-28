@@ -1,13 +1,17 @@
-
 document.addEventListener('DOMContentLoaded', function() {
+
+    document.getElementById('btnVolver').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevenir comportamiento predeterminado
+        window.location.href = '/ecar/carrito'; // Redirigir a la página deseada
+    });
     
     // Agregar un evento al campo de selección de tipo de pago para que llame a la función al cambiar
     document.getElementById('paymentType').addEventListener('change', showFields);
   
-        debugger
+       // debugger
         document.getElementById('paymentForm').addEventListener('submit', function (event) {
             event.preventDefault(); // Prevenir el envío predeterminado del formulario
-            debugger
+            //debugger
             // Obtener valores del formulario
             const clientId = document.getElementById('clientId').value;
             const amount = document.getElementById('amount').value;
@@ -41,27 +45,66 @@ document.addEventListener('DOMContentLoaded', function() {
             }
     
             // Enviar la solicitud POST al servidor
-            fetch('/api_pagos/', {
+            fetch('/payments/api_pagos/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value // Obtener el token CSRF del formulario
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // Token CSRF
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData) // Convertir los datos a JSON
             })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Error en la solicitud: ${response.statusText}`);
                 }
-                return response.text(); // Cambiar a text si la respuesta es un mensaje de éxito simple
+                return response.json(); // Parsear la respuesta JSON
             })
             .then(data => {
-                alert('Pago creado exitosamente');
-                console.log(data);
+                if (data.status === "success") {
+                    //alert(`Pago realizado con éxito. ID del pago: ${data.payment_id}`);
+                    console.log(data);
+            
+                    // Datos para generar el pedido
+                    const formDataPedido = {
+                        pago_id: data.payment_id // Usar el ID del pago recibido
+                    };
+                    debugger
+                    // Enviar la solicitud para generar el pedido
+                    return fetch('/payments/generarPedido/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // Token CSRF
+                             'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(formDataPedido) // Convertir los datos del pedido a JSON
+                    });
+                } else {
+                    alert(`Error al realizar el pago: ${data.error}`);
+                    throw new Error(data.error);
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la solicitud de pedido: ${response.statusText}`);
+                }
+                
+                return response.json(); // Parsear la respuesta JSON del pedido
+            })
+            .then(data => {
+                if (data.status === "success") {
+                    
+                    window.location.href = '/payments/succesful/';
+                    //alert(`Pedido generado con éxito. Orden #${data.orden_id}`);
+                    console.log(data);
+                } else {
+                    alert(`Error al generar el pedido: ${data.error}`);
+                }
             })
             .catch(error => {
-                console.error('Error al realizar la solicitud:', error);
-                alert('Ocurrió un error al procesar el pago.');
+                console.error('Error durante el proceso:', error);
+                alert('Ocurrió un error durante el proceso.');
             });
         });
     });
