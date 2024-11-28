@@ -21,8 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# import secrets
-# print(secrets.token_urlsafe(50))
 SECRET_KEY = 'django-insecure-4o%zvzc4wjzsstx5zc0jh^+3ln6m=*#t$(8!lm+j8+o78mz)tw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -61,7 +59,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-     'csp.middleware.CSPMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -175,7 +172,3 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # # El dominio de la cookie (en este caso, None significa que es para el dominio actual)
 # SESSION_COOKIE_DOMAIN = None
-
-#SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
