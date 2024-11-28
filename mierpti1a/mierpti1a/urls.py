@@ -33,6 +33,7 @@ urlpatterns = [
     path('inventory', include('inventory.urls')),
     path('ecar/', include('ecar.urls')), 
     path('payments/' , include('payments.urls')),
+    path('payments/' , include('payments.urls')),
     path('api-auth/', include('rest_framework.urls')),
 ]
 

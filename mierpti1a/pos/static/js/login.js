@@ -51,6 +51,7 @@ document.getElementById("formLogin").addEventListener("submit", function(event) 
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCSRFToken()  // CSRF Token para la seguridad
+            'X-CSRFToken': getCSRFToken()  // CSRF Token para la seguridad
         },
         body: JSON.stringify({
             folio: folio,  // Usamos el valor del campo de usuario
@@ -83,6 +84,8 @@ document.getElementById("formLogin").addEventListener("submit", function(event) 
             // Mostrar error si el login falla
             alert(data.error);
             console.log(data.empleado);
+            alert(data.error);
+            console.log(data.empleado);
         }
     })
     .catch(error => {
@@ -92,4 +95,6 @@ document.getElementById("formLogin").addEventListener("submit", function(event) 
         button.textContent = 'Iniciar sesión';
         button.disabled = false;
     });
+});
+
 });

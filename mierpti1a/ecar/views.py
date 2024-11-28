@@ -104,6 +104,8 @@ def eliminar_del_carrito_api(request):
 # ----------------------- Vistas para el Frontend ----------------------- #
 import requests
 from django.shortcuts import render
+import requests
+from django.shortcuts import render
 # Vista para mostrar la página de inicio con el catálogo de productos
 @login_required(login_url='/ecar/login/')
 def catalogo(request):
@@ -135,12 +137,73 @@ def catalogo(request):
         print(f"Error al obtener los productos: {e}")
         productos = []
 
+    try:
+        response = requests.get('http://127.0.0.1:8000/pos/api_productos/')
+        if response.status_code == 200:
+            productos_data = response.json()  # Obtener los datos del JSON
+            productos = productos_data.get('productos', [])  # Extraer la lista de productos
+
+            # Modificar las rutas de las imágenes y calcular el precio con descuento
+            for producto in productos:
+                producto['imagen'] = producto['imagen'].replace('pos/static/img/', '')
+
+                # Cálculo del precio con descuento
+                try:
+                    precio = Decimal(producto['precio_unitario'])
+                    descuento = Decimal(producto['descuento'])
+                    if descuento > 0:
+                        descuento_decimal = descuento / Decimal(100)
+                        producto['precio_con_descuento'] = round(precio * (1 - descuento_decimal), 2)
+                    else:
+                        producto['precio_con_descuento'] = precio
+                except (KeyError, ValueError, TypeError) as e:
+                    print(f"Error al calcular el precio con descuento: {e}")
+                    producto['precio_con_descuento'] = producto.get('precio_unitario', '0.00')
+        else:
+            productos = []  # En caso de error en la respuesta, dejar los productos vacíos
+    except requests.exceptions.RequestException as e:
+        print(f"Error al obtener los productos: {e}")
+        productos = []
+
     return render(request, 'ecar/catalogo.html', {'productos': productos})
+
 
 
 # Vista para mostrar los detalles de un producto
 @login_required(login_url='/ecar/login/')
 def detalle_producto(request, producto_id):
+    try:
+        # Obtener los datos de la API
+        response = requests.get('http://127.0.0.1:8000/pos/api_productos/')
+        if response.status_code == 200:
+            productos_data = response.json()
+            productos = productos_data.get('productos', [])
+            for producto in productos:
+                producto['imagen'] = producto['imagen'].replace('pos/static/img/', '')
+            # Buscar el producto por su ID
+            producto = next((p for p in productos if p['id'] == int(producto_id)), None)
+        else:
+            producto = None
+    except requests.exceptions.RequestException as e:
+        print(f"Error al obtener el producto: {e}")
+        producto = None
+
+    if producto is None:
+        return redirect('catalogo')
+
+    # Calcular el precio con descuento directamente en el diccionario
+    try:
+        precio = Decimal(producto['precio_unitario'])
+        descuento = Decimal(producto['descuento'])
+        if descuento > 0:
+            descuento_decimal = descuento / Decimal(100)
+            producto['precio_con_descuento'] = round(precio * (1 - descuento_decimal), 2)
+        else:
+            producto['precio_con_descuento'] = precio
+    except (KeyError, ValueError, TypeError) as e:
+        print(f"Error al calcular el precio con descuento: {e}")
+        producto['precio_con_descuento'] = producto.get('precio_unitario', '0.00')
+
     try:
         # Obtener los datos de la API
         response = requests.get('http://127.0.0.1:8000/pos/api_productos/')
@@ -224,13 +287,54 @@ def carrito(request):
                 ).quantize(Decimal('0.01')),  # Calcular precio con descuento y redondear
             })
 
+    # Obtener información actualizada de los productos desde la API
+    try:
+        response = requests.get('http://127.0.0.1:8000/pos/api_productos/')
+        if response.status_code == 200:
+            productos_data = response.json().get('productos', [])
+            productos_dict = {}
+            for producto in productos_data:
+                # Ajustar la URL de la imagen
+                producto['imagen'] = producto['imagen'].replace('pos/static/img/', '')
+                productos_dict[producto['id']] = producto  # Crear un diccionario por ID
+        else:
+            productos_dict = {}
+    except requests.exceptions.RequestException as e:
+        print(f"Error al obtener los productos desde la API: {e}")
+        productos_dict = {}
+
+    # Generar la lista de productos en el carrito combinando datos de la API y del carrito
+    carrito_actualizado = []
+    for item in productos_carrito:
+        producto_api = productos_dict.get(item.producto.id)  # Buscar el producto en la API por ID
+        if producto_api:
+            # Mezclar los datos del carrito con los datos actualizados de la API
+            carrito_actualizado.append({
+                'id': item.id,
+                'producto_id': item.producto.id,
+                'nombre': producto_api.get('nombre', 'Producto no disponible'),
+                'cantidad': item.cantidad,
+                'precio_unitario': Decimal(producto_api.get('precio_unitario', 0)),
+                'descuento': Decimal(producto_api.get('descuento', 0)),
+                'imagen': producto_api.get('imagen', ''),  # Imagen procesada
+                'precio_con_descuento': (
+                    Decimal(producto_api.get('precio_unitario', 0)) *
+                    (1 - Decimal(producto_api.get('descuento', 0)) / 100)
+                ).quantize(Decimal('0.01')),  # Calcular precio con descuento y redondear
+            })
+
     # Calcular el total del carrito
+    total = sum(
+        item['precio_con_descuento'] * item['cantidad']
+        for item in carrito_actualizado
+    )
     total = sum(
         item['precio_con_descuento'] * item['cantidad']
         for item in carrito_actualizado
     )
 
     return render(request, 'ecar/carrito.html', {
+        'productos_carrito': carrito_actualizado,
         'productos_carrito': carrito_actualizado,
         'total': total
     })

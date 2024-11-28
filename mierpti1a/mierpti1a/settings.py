@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-4o%zvzc4wjzsstx5zc0jh^+3ln6m=*#t$(8!lm+j8+o78mz)tw
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,6 +61,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -145,6 +152,7 @@ STATICFILES_DIRS = [
     #BASE_DIR / "static",
     BASE_DIR / "inventory/static",
     BASE_DIR / "media/pos/static",
+    BASE_DIR / "media/pos/static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
@@ -161,7 +169,7 @@ LOGIN_REDIRECT_URL = '/ecar/catalogo/'
 LOGIN_URL = '/ecar/login/'
 
 
-#LOGIN_REDIRECT_URL = '/shipments/orders/'
+LOGIN_REDIRECT_URL = '/shipments/orders/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Nombre de la cookie de sesión
