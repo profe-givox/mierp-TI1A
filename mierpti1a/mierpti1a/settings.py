@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ecar.middleware.CheckOriginAPIMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -68,10 +69,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",
-    "http://localhost:8000",
-]
 
 ROOT_URLCONF = 'mierpti1a.urls'
 
@@ -180,3 +177,9 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # # El dominio de la cookie (en este caso, None significa que es para el dominio actual)
 # SESSION_COOKIE_DOMAIN = None
+
+# Configuración de cookies
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Cambia a True si usas HTTPS
+CSRF_COOKIE_SECURE = False     # Cambia a True si usas HTTPS

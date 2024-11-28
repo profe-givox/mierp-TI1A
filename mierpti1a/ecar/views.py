@@ -29,14 +29,26 @@ def check_origin(func):
         referer = request.META.get('HTTP_REFERER', 'No disponible')
         print(f"Solicitud proveniente de: {referer}")
 
-        allowed_origins = ['http://127.0.0.1:8000/ecar/catalogo/','http://127.0.0.1:8000/payments/pagos/','http://127.0.0.1:8000/payments/succesful/']
+        allowed_origins = ['http://127.0.0.1:8000/ecar/catalogo/',
+                           'http://127.0.0.1:8000/payments/pagos/',
+                           'http://127.0.0.1:8000/payments/succesful/',
+                           'http://127.0.0.1:8000/ecar/carrito/',]
         if referer not in allowed_origins:
             return JsonResponse({'error': 'Acceso no permitido'}, status=403)
-
         return func(request, *args, **kwargs)
-
     return wrap
 
+def check_origin_api(func):
+    def wrap(request, *args, **kwargs):
+        # Obtener la URL de la página de donde proviene la solicitud
+        referer = request.META.get('HTTP_REFERER', 'No disponible')
+        print(f"Solicitud proveniente de: {referer}")
+
+        allowed_origins = ['http://127.0.0.1:8000/ecar/catalogo/','http://127.0.0.1:8000/ecar/carrito/']
+        if referer not in allowed_origins:
+            return JsonResponse({'error': 'Acceso no permitido'}, status=403)
+        return func(request, *args, **kwargs)
+    return wrap
 
 # ----------------------- Vistas para la API REST ----------------------- #
 
@@ -67,6 +79,7 @@ class PedidoViewSet(viewsets.ModelViewSet):
 # API para actualizar cantidad del producto en el carrito
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@check_origin_api
 def actualizar_carrito_api(request):
     item_id = request.data.get('item_id')
     action = request.data.get('action')
@@ -90,6 +103,7 @@ def actualizar_carrito_api(request):
 # API para eliminar un producto del carrito
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@check_origin_api
 def eliminar_del_carrito_api(request):
     item_id = request.data.get('item_id')
 
@@ -107,6 +121,7 @@ from django.shortcuts import render
 import requests
 from django.shortcuts import render
 # Vista para mostrar la página de inicio con el catálogo de productos
+#@check_origin
 @login_required(login_url='/ecar/login/')
 def catalogo(request):
     try:
@@ -170,6 +185,7 @@ def catalogo(request):
 
 
 # Vista para mostrar los detalles de un producto
+@check_origin
 @login_required(login_url='/ecar/login/')
 def detalle_producto(request, producto_id):
     try:
@@ -242,8 +258,7 @@ def detalle_producto(request, producto_id):
 @check_origin
 @login_required(login_url='/ecar/login/')
 def carrito(request):
-    # Obtener el carrito del usuario
-
+    referer = request.GET.get('referer', '')
     empleado_json = request.COOKIES.get('empleado')
     # empleado_decoded = unquote(empleado_json)
     print(f"Debug: mi empleado: {empleado_json}")
@@ -272,7 +287,6 @@ def carrito(request):
     for item in productos_carrito:
         producto_api = productos_dict.get(item.producto.id)  # Buscar el producto en la API por ID
         if producto_api:
-            # Mezclar los datos del carrito con los datos actualizados de la API
             carrito_actualizado.append({
                 'id': item.id,
                 'producto_id': item.producto.id,
@@ -339,7 +353,7 @@ def carrito(request):
         'total': total
     })
 
-
+@check_origin
 @login_required(login_url='/ecar/login/')
 def agregar_al_carrito(request):
     if request.method == 'POST':
@@ -374,8 +388,6 @@ def agregar_al_carrito(request):
         else:
             carrito_producto.cantidad = 1
         carrito_producto.save()
-
-        # Redirigir al carrito después de actualizar el producto
         return redirect('carrito')
     else:
         return redirect('carrito')
@@ -390,7 +402,6 @@ router = DefaultRouter()
 router.register(r'productos', ProductoViewSet)
 router.register(r'carritos', CarritoViewSet)
 router.register(r'carrito-productos', CarritoProductoViewSet)
-router.register(r'pedidos', PedidoViewSet)
 
 # Agregar las nuevas APIs para actualizar y eliminar del carrito
 from django.urls import path
