@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from RRHH.models import Empleado
 
 # ------------------------------------------------------------------------------------
 # MODELOS RELACIONADOS CON EL MÓDULO DE PREGUNTAS FRECUENTES, ARTÍCULOS Y GUÍAS 
@@ -31,7 +33,7 @@ class FAQArticle(models.Model):
 # ------------------------------------------------------------------------------------
 
 # Modelo de usuario para tener su información básica
-class User(models.Model):
+class UserPublic(models.Model):
     name = models.CharField(max_length=60)
     lastName = models.CharField(max_length=60)
     email = models.EmailField()
@@ -68,7 +70,7 @@ class Ticket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE) # Usuario que abrió el ticket
-    assigned_to = models.ForeignKey(SupportAgent, on_delete=models.SET_NULL, null=True, blank=True) # Agente asignado, puede ser nulo
+    assigned_to = models.ForeignKey(Empleado, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets_asignados') # Agente asignado, puede ser nulo
 
     def __str__(self):
         return f"{self.title} ({self.status})"

@@ -1,0 +1,35 @@
+{% extends 'crm/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="ticket-details">
+        <h2 class="mb-4">{{ ticket.title }}</h2>
+        <p>{{ ticket.description }}</p>
+    </div>
+
+    <h2 class="mt-5">Respuestas</h2>
+    {% if comments %}
+        <ul class="list-group">
+            {% for comment in comments %}
+                <li class="list-group-item">
+                    <strong>{{ comment.created_by.username }}</strong> comentó:
+                    <p>{{ comment.comment }}</p>
+                    <small class="text-muted">{{ comment.created_at }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">Este ticket no tiene comentarios.</p>
+    {% endif %}
+
+    <!-- Formulario para agregar un comentario -->
+    <div class="mt-5">
+        <h3>Agregar un comentario</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Enviar comentario</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
