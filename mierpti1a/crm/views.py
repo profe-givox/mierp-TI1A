@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from .models import FAQArticle
 from .models import Ticket
 from .formTicket import TicketForm
+from .formComments import CommentForm
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -25,28 +26,39 @@ def comunity(request):
 
 #Vista para agregar y editar tickets
 @login_required
-def tickets(request, ticket_id=None):
-    if ticket_id:  
-        ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
-        if request.method == 'POST':
-            form = TicketForm(request.POST, instance=ticket) 
-            if form.is_valid():
-                form.save()
-                return redirect('allTickets') 
-        else:
-            form = TicketForm(instance=ticket) 
-    else: 
-        if request.method == 'POST':
-            form = TicketForm(request.POST) 
-            if form.is_valid():
-                new_ticket = form.save(commit=False)
-                new_ticket.user = request.user
-                new_ticket.save()
-                return redirect('allTickets') 
-            form = TicketForm() 
-    return render(request, 'crm/ticket.html', {
+def tickets(request):
+    if request.method == 'POST':
+        form = TicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(commit=False) 
+            ticket.user = request.user 
+            ticket.save() 
+            return redirect('allTickets')  
+    else:
+        form = TicketForm()
+    
+    return render(request, 'crm/ticket.html', {'form': form})
+
+#Vista para obtener los comentarios del ticket
+def solutions(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    comments = ticket.comments.all()
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.ticket = ticket
+            comment.created_by = request.user 
+            comment.save()
+            return redirect('solutions', ticket_id=ticket.id)
+    else:
+        form = CommentForm()
+
+    return render(request, 'crm/solutions.html', {
+        'ticket': ticket,
+        'comments': comments,
         'form': form,
-        'editing': bool(ticket_id)  
     })
 
 #Vista para mostrar todos los tickets

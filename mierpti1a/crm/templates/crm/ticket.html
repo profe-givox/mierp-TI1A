@@ -2,18 +2,29 @@
 
 {% block content %}
 <div class="container mt-5">
-    {% if editing %}
-        <h2>Editar Ticket</h2>
-    {% else %}
-        <h2>Crear Nuevo Ticket</h2>
-    {% endif %}
-    <form method="post">
+    <h2>Crear Nuevo Ticket</h2>
+    <form method="post" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">
-            {% if editing %}Guardar Cambios{% else %}Crear Ticket{% endif %}
-        </button>
-        <a href="{% url 'allTickets' %}" class="btn btn-secondary">Cancelar</a>
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="text-danger">
+                {{ form.title.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="text-danger">
+                {{ form.description.errors }}
+            </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Crear</button>
     </form>
 </div>
 {% endblock %}
