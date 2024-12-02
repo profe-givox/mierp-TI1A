@@ -8,4 +8,6 @@ urlpatterns = [
     path("allTickets/", views.allTickets, name="allTickets"),
     path('ticket/', views.tickets, name='ticket'),
     path('solutions/<int:ticket_id>/', views.solutions, name='solutions'),
+
+    path('controlPanel/', views.allTicketsAdmin, name='controlPanel'),
 ]

@@ -1,0 +1,62 @@
+{% extends 'crm/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Administración de Tickets</h1>
+    <form method="post" action="{% url 'controlPanel' %}">
+        {% csrf_token %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Asignado a</th>
+                    <th>Creador</th>  <!-- Nueva columna -->
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.description }}</td>
+                    <td>
+                        <select name="status_{{ ticket.id }}" class="form-select">
+                            {% for key, value in status_choices %}
+                            <option value="{{ key }}" {% if key == ticket.status %}selected{% endif %}>
+                                {{ value }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <select name="assigned_to_{{ ticket.id }}" class="form-select">
+                            <option value="" {% if not ticket.assigned_to %}selected{% endif %}>
+                                No asignado
+                            </option>
+                            {% for empleado in empleados %}
+                            <option value="{{ empleado.id }}" {% if empleado == ticket.assigned_to %}selected{% endif %}>
+                                {{ empleado.user.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <!-- Mostrar el usuario que creó el ticket -->
+                        {{ ticket.user.username }}
+                    </td>
+                    <td>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </td>
+                    <td>
+                        <a href="{% url 'solutions' ticket.id %}"  class="btn btn-info btn-sm">Dar solución</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+{% endblock %}
