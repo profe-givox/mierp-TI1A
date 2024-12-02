@@ -1,0 +1,54 @@
+{% extends 'crm/base.html' %}
+
+{% block content %}
+<div class="chat-container"> 
+    <div class="chat-header"> 
+       
+
+        <div>
+            {% if other_user %}
+            {% else %}
+            <span id="online-count" class="online-count"></span>
+            {% endif %}
+        </div>
+       
+    </div>
+
+    <div id="chat_window" class="chat-body"> 
+        <ul id="chat_messages"> 
+            {% for message in messages reversed %}
+                {% include 'crm/chat_message.html' %} 
+            {% empty %}
+                <p>No hay mensajes en este chat.</p> 
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="chat-footer"> 
+        <form id="chat_message_form"
+           hx-ext="ws"
+           ws-connect="/ws/chatroom/{{ chatroom_name }}"
+           ws-send
+            _="on htmx:wsAfterSend reset() me">
+            {% csrf_token %}
+            <div class="input-group"> 
+                <input type="text" name="body" id="body" placeholder="Escribe tu mensaje aquí..." required>
+                <button type="submit">Enviar</button> 
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    function scrollToBottom(time = 0) {
+        setTimeout(function () {
+            const container = document.getElementById('chat_window');
+            container.scrollTop = container.scrollHeight;
+        }, time);
+    }
+    
+    scrollToBottom();
+</script>
+{% endblock %}

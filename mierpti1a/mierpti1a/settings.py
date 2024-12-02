@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'crm',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -84,6 +85,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mierpti1a.wsgi.application'
+ASGI_APPLICATION = 'mierpti1a.asgi.application'
+
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.

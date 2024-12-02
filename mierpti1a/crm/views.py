@@ -9,8 +9,13 @@ from .formComments import CommentForm
 from .FormTicketsAdmin import TicketUpdateForm
 from django.contrib.auth.decorators import login_required
 from RRHH.models import Empleado
-
 import json
+from .models import *
+from crm.models import ChatGroup, GroupMessage
+from django.http import Http404
+from .forms import ChatmessageCreateForm
+import shortuuid
+
 
 # Create your views here.
 def home(request):
@@ -74,8 +79,6 @@ def allTickets(request):
     return render(request, 'crm/allTickets.html', {'tickets': tickets})
 
 
-
-
 #Vistas para los del equipo de soporte de los tickets
 
 #Vista para mostrar todo los tickets
@@ -108,3 +111,58 @@ def allTicketsAdmin(request):
             'status_choices': status_choices,
             'empleados': empleados,
         })
+#Vistas de chat
+@login_required
+def chat_view(request, chatroom_name='public-chat'):
+    # Obtener el grupo de chat o lanzar 404
+    chat_group = get_object_or_404(ChatGroup, group_name=chatroom_name)
+
+    chat_messages = chat_group.chat_messages.all()[:30]  # Últimos 30 mensajes
+    form = ChatmessageCreateForm()
+
+    other_user = None
+    # Validar si es un chat privado y si el usuario pertenece al grupo
+    if chat_group.is_private:
+        if request.user not in chat_group.members.all():
+            raise Http404("No tienes acceso a este chat privado.")
+        # Encontrar al otro usuario en el chat privado
+        other_user = chat_group.members.exclude(id=request.user.id).first()
+
+    # Manejar solicitudes HTMX para mensajes nuevos
+    if request.htmx:
+        form = ChatmessageCreateForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.author = request.user
+            message.group = chat_group
+            message.save()
+            context = {'message': message, 'user': request.user}
+            return render(request, 'crm/chat_message_p.html', context)
+
+    # Contexto para renderizar la plantilla
+    context = {
+        'messages': chat_messages,
+        'form': form,
+        'other_user': other_user,
+        'chatroom_name': chatroom_name,
+    }
+    return render(request, 'crm/chat.html', context)
+
+@login_required
+def get_or_create_chatroom(request, username):
+    if request.user.username == username:
+        return redirect('home')  # Evitar chats con uno mismo
+
+    # Obtener al otro usuario o lanzar 404 si no existe
+    other_user = get_object_or_404(User, username=username)
+
+    # Buscar chat privado existente
+    chatroom = request.user.chat_groups.filter(is_private=True, members=other_user).first()
+
+    # Si no existe, crear un nuevo chat privado
+    if not chatroom:
+        chatroom = ChatGroup.objects.create(is_private=True)
+        chatroom.members.add(request.user, other_user)
+
+    return redirect('chatroom', chatroom_name=chatroom.group_name)
+

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from.models import *
 
 from crm.models import User, FAQArticle, SupportAgent, SupportCategory, SupportChannel, Ticket, TicketComment
 
@@ -24,3 +25,5 @@ admin.site.register(SupportCategory)
 admin.site.register(SupportChannel)
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(TicketComment) 
+admin.site.register(ChatGroup)
+admin.site.register(GroupMessage)

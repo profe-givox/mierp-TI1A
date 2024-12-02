@@ -6,11 +6,49 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Support{% endblock %}</title>
     {% load static %}
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <link rel="stylesheet" href="{% static 'crm/content/bootstrap/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'crm/content/bootstrap/css/estilos.css' %}">
+    <script src="https://unpkg.com/hyperscript.org"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
 </head>
 <body>
     
     {% include "crm/navbar.html" %}
+
+    <!-- Combo box solo visible si el usuario está autenticado -->
+    {% if user.is_authenticated %}
+    <div class="button-container dropdown" style="position: absolute; top: 10px; right: 10px;">
+        <button class="btn btn-primary dropdown-toggle" 
+                type="button" 
+                id="dropdownMenuButton" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false">
+            Mensajes
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <!-- Opción para chat público -->
+            <li>
+                <a class="dropdown-item" href="{% url 'chat' %}">Chat público</a>
+            </li>
+
+            <!-- Listar chats privados -->
+            {% for chatroom in user.chat_groups.all %}
+                {% if chatroom.is_private %}
+                    {% for member in chatroom.members.all %}
+                        {% if member != user %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'chatroom' chatroom.group_name %}">
+                                {{ member.profile.name }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
     {% block content %}
     {% endblock %}
