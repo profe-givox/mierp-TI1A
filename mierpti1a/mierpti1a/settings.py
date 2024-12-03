@@ -165,4 +165,3 @@ LOGIN_URL = '/ecar/login/'
 
 LOGIN_REDIRECT_URL = '/shipments/orders/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
-
