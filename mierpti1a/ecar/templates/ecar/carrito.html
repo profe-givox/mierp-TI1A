@@ -109,6 +109,7 @@
                                     location.reload();
                                 }
                             }
+                            location.reload();
                         } else {
                             alert(response.message); // Mostrar mensaje de error
                         }
@@ -119,34 +120,25 @@
                     }
                 });
             });
+            $('.remove-item').click(function () {
+                const itemId = $(this).data('id');
+                $.ajax({
+                    url: '/ecar/api/remove-from-cart/',
+                    method: 'POST',
+                    data: {
+                        'item_id': itemId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
         });
         
         
     </script>
-    <script>
-        document.querySelector('#add-to-cart-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-        
-            fetch("{% url 'agregar_al_carrito' %}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message); // Mostrar mensaje de éxito
-                    // Opcional: actualizar la UI, como el contador del carrito
-                } else {
-                    alert(data.message); // Mostrar mensaje de error
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-        </script>
+    
 </body>
 </html>
 {% endblock %}
