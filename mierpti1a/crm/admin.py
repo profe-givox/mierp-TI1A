@@ -1,7 +1,7 @@
 from django.contrib import admin
 from.models import *
 
-from crm.models import User, FAQArticle, SupportAgent, SupportCategory, SupportChannel, Ticket, TicketComment
+from crm.models import  FAQArticle, SupportCategory, SupportChannel, Ticket, TicketComment, Reseña
 
 class TicketCommentInline(admin.TabularInline):
     model = TicketComment
@@ -27,3 +27,4 @@ admin.site.register(Ticket, TicketAdmin)
 admin.site.register(TicketComment) 
 admin.site.register(ChatGroup)
 admin.site.register(GroupMessage)
+admin.site.register(Reseña)
