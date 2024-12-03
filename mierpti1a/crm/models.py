@@ -1,10 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from RRHH.models import Empleado
+from inventory.models import Producto
 from django.db import models
-from django.contrib.auth.models import User
 import shortuuid
-from PIL import Image
 
 # ------------------------------------------------------------------------------------
 # MODELOS RELACIONADOS CON EL MÓDULO DE PREGUNTAS FRECUENTES, ARTÍCULOS Y GUÍAS 
@@ -227,3 +226,36 @@ class GroupMessage(models.Model):
     
     class Meta:
         ordering = ['-created']
+
+
+# ------------------------------------------------------------------------------------
+# MODELO RELACIONADO A LA API DE COMUNICACIÓN DE CRM Y PRODUCTOS DE LA TIENDA EN LÍNEA
+# ------------------------------------------------------------------------------------
+
+class Reseña(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='reseñas')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reseñas')
+    calificacion = models.IntegerField()  # Calificación numérica entre 1 y 5
+    texto = models.TextField()  # Campo para el texto de la reseña
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reseña de {self.usuario} sobre {self.producto}"
+
+    def clean(self):
+        """Valida que la calificación esté entre 1 y 5."""
+        from django.core.exceptions import ValidationError
+        if not (1 <= self.calificacion <= 5):
+            raise ValidationError('La calificación debe estar entre 1 y 5.')
+        
+    class Meta:
+        unique_together = ('producto', 'usuario')
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(calificacion__gte=1) & models.Q(calificacion__lte=5),
+                name='calificacion_valida'
+            )
+        ] 
+        ordering = ['-fecha_creacion']  # Ordenar por fecha de creación descendente
+
+

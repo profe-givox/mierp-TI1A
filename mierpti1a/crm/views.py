@@ -16,6 +16,12 @@ from django.http import Http404
 from .forms import ChatmessageCreateForm
 import shortuuid
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Reseña
+from .serializers import ReseñaSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 # Create your views here.
 def home(request):
@@ -25,13 +31,10 @@ def home(request):
     # Pasar los artículos al contexto de la plantilla
     return render(request, 'crm/home.html', {'faq_articles': faq_articles})
 
+
 def faqs(request):
     faq_articles = FAQArticle.objects.filter(category__name="FAQs")  # Filtra por categoría "faqs"
     return render(request, 'crm/faqs.html', {'faq_articles': faq_articles})
-
-def comunity(request):
-    return render(request, 'crm/comunity.html')
-
 
 
 #Vista para agregar y editar tickets
@@ -166,3 +169,73 @@ def get_or_create_chatroom(request, username):
 
     return redirect('chatroom', chatroom_name=chatroom.group_name)
 
+
+
+
+
+# ------------------------------------------------------------------------------------
+# API DE LAS RESEÑAS
+# ------------------------------------------------------------------------------------
+
+class ResenaListCreateView(APIView):
+    def get_permissions(self):
+        """Define permisos específicos por método."""
+        if self.request.method == 'GET':
+            return [AllowAny()]  # Permite acceso público a las reseñas
+        return [IsAuthenticated()]  # Requiere autenticación para crear una reseña
+
+    def get(self, request, format=None):
+        """Obtiene todas las reseñas."""
+        reseñas = Reseña.objects.all()
+        serializer = ReseñaSerializer(reseñas, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        """Crea una nueva reseña."""
+        serializer = ReseñaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(usuario=request.user)  # Asocia al usuario actual
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ResenaDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return Reseña.objects.get(pk=pk)
+        except Reseña.DoesNotExist:
+            return None
+
+    def get(self, request, pk, format=None):
+        """Obtiene una reseña por su ID."""
+        reseña = self.get_object(pk)
+        if reseña is None:
+            return Response({"error": "Reseña no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ReseñaSerializer(reseña)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        """Actualiza una reseña."""
+        reseña = self.get_object(pk)
+        if reseña is None:
+            return Response({"error": "Reseña no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+        if reseña.usuario != request.user:
+            return Response({"error": "No tienes permiso para editar esta reseña"}, status=status.HTTP_403_FORBIDDEN)
+        serializer = ReseñaSerializer(reseña, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        """Elimina una reseña."""
+        reseña = self.get_object(pk)
+        if reseña is None:
+            return Response({"error": "Reseña no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+        if reseña.usuario != request.user:
+            return Response({"error": "No tienes permiso para eliminar esta reseña"}, status=status.HTTP_403_FORBIDDEN)
+        reseña.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

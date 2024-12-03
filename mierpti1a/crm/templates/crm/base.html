@@ -29,6 +29,7 @@
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <!-- Opción para chat público -->
             <li>
+                <a class="dropdown-item" href="{% url 'controlPanel' %}">Panel administrativo</a>
                 <a class="dropdown-item" href="{% url 'chat' %}">Chat público</a>
             </li>
 
@@ -47,6 +48,7 @@
                 {% endif %}
             {% endfor %}
         </ul>
+
     </div>
     {% endif %}
 
