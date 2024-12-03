@@ -16,6 +16,9 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Dominio de ngrok u otros dominios temporales
+NGROK_DOMAIN = '510b-138-99-150-98.ngrok-free.app'
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -26,7 +29,18 @@ SECRET_KEY = 'django-insecure-4o%zvzc4wjzsstx5zc0jh^+3ln6m=*#t$(8!lm+j8+o78mz)tw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', NGROK_DOMAIN]
+
+SECURE_HSTS_SECONDS = 31536000  # Un año
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+#SECURE_SSL_REDIRECT = True  
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+
 
 
 # Application definition
@@ -61,10 +75,27 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",
-    "http://localhost:8000",
+ALLOWED_HOSTS =[
+    '127.0.0.1',
+    'localhost',
+    NGROK_DOMAIN
 ]
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    f'https://{NGROK_DOMAIN}'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    f'https://{NGROK_DOMAIN}'
+]
+
+CSRF_ALLOW_ALL_ORIGINS = True
+
 
 ROOT_URLCONF = 'mierpti1a.urls'
 
@@ -86,6 +117,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mierpti1a.wsgi.application'
 ASGI_APPLICATION = 'mierpti1a.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -143,8 +181,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "ecar",  # Agrega la ruta de la carpeta que contiene los estáticos
-    BASE_DIR / "static",
+    BASE_DIR / "ecar",
     BASE_DIR / "inventory/static",
     BASE_DIR / "media/pos/static",
 ]
@@ -165,3 +202,6 @@ LOGIN_URL = '/ecar/login/'
 
 LOGIN_REDIRECT_URL = '/shipments/orders/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Habilitar WhiteNoise para servir archivos estáticos comprimidos y cacheables
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
