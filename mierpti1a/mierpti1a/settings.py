@@ -47,9 +47,11 @@ INSTALLED_APPS = [
     'ecar',
     'payments',
     'corsheaders',
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -58,12 +60,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'csp.middleware.CSPMiddleware',
+    'ecar.middleware.CheckOriginAPIMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
 ]
+
 
 ROOT_URLCONF = 'mierpti1a.urls'
 
@@ -141,8 +146,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "ecar",  # Agrega la ruta de la carpeta que contiene los estáticos
-    BASE_DIR / "static",
+    #BASE_DIR / "static",
     BASE_DIR / "inventory/static",
+    BASE_DIR / "media/pos/static",
     BASE_DIR / "media/pos/static",
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -163,3 +169,17 @@ LOGIN_URL = '/ecar/login/'
 LOGIN_REDIRECT_URL = '/shipments/orders/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
+# Nombre de la cookie de sesión
+# SESSION_COOKIE_NAME = 'my_session_cookie'
+
+# # El path donde la cookie será accesible (en este caso, para todo el sitio)
+# SESSION_COOKIE_PATH = '/'
+
+# # El dominio de la cookie (en este caso, None significa que es para el dominio actual)
+# SESSION_COOKIE_DOMAIN = None
+
+# Configuración de cookies
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Cambia a True si usas HTTPS
+CSRF_COOKIE_SECURE = False     # Cambia a True si usas HTTPS

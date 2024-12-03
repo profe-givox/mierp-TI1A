@@ -14,7 +14,11 @@
 <body>
     <div class="container">
         <h1>{{ producto.nombre }}</h1>
-        <img src="{% static 'img/' %}{{ producto.imagen }}" class="img-fluid" alt="{{ producto.nombre }}">
+        <img src="{% static 'img/' %}{{ producto.imagen }}" 
+     class="img-fluid" 
+     alt="{{ producto.nombre }}" 
+     style="width: 400px; height: 400px; object-fit: cover;">
+
         <p>{{ producto.descripcion }}</p>
         <p><strong>Precio: ${{ producto.precio_unitario }}</strong></p>
         {% if producto.descuento > 0 %}
@@ -34,6 +38,50 @@
             </button>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Seleccionar el formulario de añadir al carrito
+            const addToCartForm = document.querySelector('form[action="{% url "agregar_al_carrito" %}"]');
+    
+            if (addToCartForm) {
+                addToCartForm.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Evitar el envío tradicional del formulario
+    
+                    const formData = new FormData(addToCartForm); // Obtener los datos del formulario
+                    const csrfToken = addToCartForm.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+                    // Enviar datos al servidor
+                    fetch(addToCartForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                        },
+                        body: formData,
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message); // Mostrar mensaje de éxito
+                            // Opcional: actualizar la UI o mostrar un modal
+                        } else {
+                            alert(data.message); // Mostrar mensaje de error
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ocurrió un error al procesar la solicitud.');
+                    });
+                });
+            }
+        });
+    </script>
+    
 </body>
+
 </html>
 {% endblock %}

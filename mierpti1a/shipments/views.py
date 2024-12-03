@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Order, OrderHistory, OrderStatus, Route, Address, Sucursal
-from .forms import OrderForm, AddressForm
+from .models import Order, OrderHistory, OrderStatus, Route, Address, Sucursal, Orden, DetalleOrden
+from .forms import OrderForm, AddressForm, ChangeOrderStatusForm
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .serializers import SucursalSerializer
@@ -8,17 +8,18 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
+from django.contrib import messages
 
 
 @login_required
 def order_list(request):
-    # Si el usuario es administrador, mostramos todos los pedidos
     if request.user.is_superuser:
-        orders = Order.objects.all()
+        ordenes = Orden.objects.prefetch_related('detalles').all()
     else:
-        # Si no es administrador, mostramos solo los pedidos del usuario logueado
-        orders = Order.objects.filter(user=request.user)
-    return render(request, 'shipments/order_list.html', {'orders': orders})
+        ordenes = Orden.objects.prefetch_related('detalles').filter(cliente_id=request.user.id)
+
+    return render(request, 'shipments/order_list.html', {'ordenes': ordenes})
+
 
 @login_required
 def order_create(request):
@@ -54,23 +55,49 @@ def order_create(request):
 
 
 @login_required
-def order_update(request, pk):
-    order = get_object_or_404(Order, pk=pk)
+def order_update(request, id):
+    order = get_object_or_404(Order, id=id)
+    
+    # Validar si el usuario tiene permiso para editar
+    if not request.user.is_superuser and order.status != 'pending':
+        return redirect('shipments:order_list')  # Redirige si no tiene permiso
+    
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
             # Registrar el cambio de estado
             OrderHistory.objects.create(order=order, status=order.status, changed_at=timezone.now())
-            return redirect('order_list')
+            return redirect('shipments:order_list')
     else:
         form = OrderForm(instance=order)
+    
     return render(request, 'shipments/order_update.html', {'form': form, 'order': order})
+
 
 @login_required
 def order_detail(request, id):
-    order = get_object_or_404(Order, id=id)
-    return render(request, 'shipments/order_detail.html', {'order': order})
+    orden = get_object_or_404(Orden, id=id)  # Obtén la orden por ID
+    detalles = DetalleOrden.objects.filter(orden_id=id)  # Filtra los detalles relacionados con el pedido
+
+    # Manejar las coordenadas de la dirección asociada
+    address = getattr(orden, 'address', None)
+    latitude = getattr(address, 'latitude', None)
+    longitude = getattr(address, 'longitude', None)
+
+    context = {
+        'order': orden,         # La orden completa
+        'detalles': detalles,   # Detalles relacionados
+        'latitude': latitude,   # Coordenadas de la dirección
+        'longitude': longitude,
+        'total_pedido': orden.total,  # Pasar directamente el total
+    }
+
+    return render(request, 'shipments/order_detail.html', context)
+
+
+
+
 
 @login_required
 def route_detail(request, order_id):
@@ -135,3 +162,36 @@ def eliminar_sucursal(request, pk):
             return JsonResponse({'error': 'Sucursal no encontrada'}, status=404)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def change_order_status(request, id):
+    orden = get_object_or_404(Orden, id=id)
+    
+    if request.method == 'POST':
+        form = ChangeOrderStatusForm(request.POST, instance=orden)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'El estado del pedido ha sido actualizado correctamente.')
+            return redirect('shipments:order_list')
+    else:
+        form = ChangeOrderStatusForm(instance=orden)
+    
+    return render(request, 'shipments/change_order_status.html', {'form': form, 'orden': orden})
+
+@login_required
+def cancel_order(request, id):
+    orden = get_object_or_404(Orden, id=id)
+    
+    # Verificar permisos
+    if not request.user.is_superuser and orden.status != 'PENDIENTE':
+        messages.error(request, 'No tienes permiso para cancelar este pedido.')
+        return redirect('shipments:order_list')
+    
+    if request.method == 'POST':
+        orden.delete()
+        messages.success(request, 'El pedido ha sido cancelado correctamente.')
+        return redirect('shipments:order_list')
+    
+    return render(request, 'shipments/cancel_order_confirm.html', {'orden': orden})

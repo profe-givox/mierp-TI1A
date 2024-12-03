@@ -29,17 +29,14 @@
                             <p class="card-text text-danger"><strong>Descuento: {{ producto.descuento }}%</strong></p>
                             <p class="card-text"><strong>Precio Original: <del>${{ producto.precio_unitario }}</del></strong></p>
                             <p class="card-text"><strong>Precio con Descuento: ${{ producto.precio_con_descuento|floatformat:2 }}</strong></p>
-
                         {% else %}
                             <p class="card-text"><strong>${{ producto.precio_unitario }}</strong></p>
-                            <p class="card-text"><strong>‎ </strong></p>
-                            <p class="card-text"><strong>‎ </strong></p>
                         {% endif %}
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-info-circle"></i>
                             </a>
-                            <form action="{% url 'agregar_al_carrito' %}" method="post">
+                            <form action="{% url 'agregar_al_carrito' %}" method="post" class="add-to-cart-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="producto_id" value="{{ producto.id }}">
                                 <input type="hidden" name="cantidad" value="1">
@@ -53,7 +50,45 @@
             </div>
             {% endfor %}
         </div>
-        {% endblock %}
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Interceptar el envío de los formularios
+        const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+
+        addToCartForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // Evitar el envío tradicional del formulario
+
+                const formData = new FormData(form); // Obtener los datos del formulario
+                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                // Enviar datos al servidor
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message); // Mostrar mensaje de éxito
+                        // Opcional: actualizar la interfaz del carrito
+                    } else {
+                        alert(data.message); // Mostrar mensaje de error
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error al procesar la solicitud.');
+                });
+            });
+        });
+    });
+    </script>
 </body>
 </html>
+{% endblock %}

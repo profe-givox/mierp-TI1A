@@ -15,8 +15,14 @@ function getCSRFToken() {
 // Función para guardar el empleado en las cookies
 function setEmpleadoCookie(empleado) {
     const empleadoJSON = JSON.stringify(empleado);
-    document.cookie = `empleado=${encodeURIComponent(empleadoJSON)}; path=/; max-age=3600`; // Expira en 1 hora
+    document.cookie = `empleado=${encodeURIComponent(empleadoJSON)}; path=/;SameSite=Lax`; // Expira en 1 hora
 }
+
+function deleteEmpleadoCookie() {
+    document.cookie = "empleado=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
+}
+
+
 
 // Función para guardar el empleado en almacenamiento local y de sesión
 function saveEmpleadoInStorages(empleado) {
@@ -62,6 +68,7 @@ document.getElementById("formLogin").addEventListener("submit", function(event) 
 
             // Guardar en cookies
             setEmpleadoCookie(data.empleado);
+           
 
             // Verificar el rol del empleado y redirigir según corresponda
             const puesto = data.empleado.puesto.split(' ')[0];
@@ -74,6 +81,8 @@ document.getElementById("formLogin").addEventListener("submit", function(event) 
             }
         } else {
             // Mostrar error si el login falla
+            alert(data.error);
+            console.log(data.empleado);
             alert(data.error);
             console.log(data.empleado);
         }

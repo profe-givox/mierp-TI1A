@@ -77,6 +77,7 @@ from django.contrib import messages
 from urllib.parse import unquote
 import json
 
+
 def index(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -89,6 +90,8 @@ def index(request):
             
             # Verificar la cookie 'empleado' para redirigir según el rol
             empleado_json = request.COOKIES.get('empleado')
+            print(f"Debug: Contenido de la cookie 'empleado': {empleado_json}")
+
             if empleado_json:
                 try:
                     # Decodificar y cargar los datos del empleado
@@ -123,7 +126,7 @@ def productos(request):
     productos = Producto.objects.all()
     return render(request, 'administrarProductos.html', {'productos': productos})
 
-
+@verificar_acceso
 def get_productos(request):
     productos = list(Producto.objects.values())
 
