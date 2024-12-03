@@ -24,7 +24,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 
 from django.http import HttpResponseForbidden
 import json
-from urllib.parse import unquote
+from urllib.parse import unquote,urlparse
 
 from django.http import JsonResponse
 from django.http import JsonResponse
@@ -35,8 +35,11 @@ def check_origin_payments(func):
         referer = request.META.get('HTTP_REFERER', 'No disponible')
         print(f"Solicitud proveniente de: {referer}")
 
-        allowed_origins = ['http://127.0.0.1:8000/ecar/carrito/']
-        if referer not in allowed_origins:
+        path = urlparse(referer).path
+        print(f"Solicitud proveniente de path: {path}")
+
+        allowed_origins = ['/ecar/carrito/']
+        if path not in allowed_origins:
             return JsonResponse({'error': 'Acceso no permitido'}, status=403)
 
         return func(request, *args, **kwargs)
@@ -54,6 +57,15 @@ def check_js_request(func):
         if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
             return JsonResponse({'error': 'Acceso solo permitido desde JavaScript'}, status=403)
         
+        referer = request.META.get('HTTP_REFERER', 'Desconocido')
+        print("Solicitud realizada desde:", referer)
+
+        # Extraer solo la ruta de la URL referer
+        path = urlparse(referer).path
+        allowed_paths = ['/payments/api_pagos/','/payments/pagos/']  # Rutas permitidas
+        if path not in allowed_paths:
+            return JsonResponse({'error': 'Origen no permitido'}, status=403)
+
         return func(request, *args, **kwargs)
 
     return wrap

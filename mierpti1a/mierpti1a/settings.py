@@ -27,7 +27,6 @@ SECRET_KEY = 'django-insecure-4o%zvzc4wjzsstx5zc0jh^+3ln6m=*#t$(8!lm+j8+o78mz)tw
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -61,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'csp.middleware.CSPMiddleware',
     'ecar.middleware.CheckOriginAPIMiddleware'
 ]
 

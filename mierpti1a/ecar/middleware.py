@@ -1,4 +1,6 @@
 from django.http import JsonResponse
+from urllib.parse import unquote, urlparse
+import re
 
 class CheckOriginAPIMiddleware:
     def __init__(self, get_response):
@@ -7,14 +9,22 @@ class CheckOriginAPIMiddleware:
     def __call__(self, request):
         if request.path.startswith('/ecar/api/'):
             referer = request.META.get('HTTP_REFERER', 'No disponible')
+            path = urlparse(referer).path
+            print(f"Solicitud proveniente de path: {path}")
             allowed_origins = [
-                'http://127.0.0.1:8000/ecar/catalogo/',
-                'http://127.0.0.1:8000/ecar/carrito/',
-                'http://127.0.0.1:8000/pos/api_productos/'
+                '/ecar/catalogo/',
+                '/ecar/carrito/',
+                '/pos/api_productos/',
             ]
-            if referer not in allowed_origins:
+
+            if path.startswith('/ecar/producto/') and re.match(r'^/ecar/producto/\d+/$', path):
+                return self.get_response(request)
+
+            if path not in allowed_origins:
                 return JsonResponse({'error': 'Acceso no permitido'}, status=403)
+        
         return self.get_response(request)
+
 
     # def __call__(self, request):
     #     # Comprueba si la solicitud es hacia /ecar/api/

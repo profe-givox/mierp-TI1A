@@ -78,45 +78,75 @@
             $('.update-quantity').click(function () {
                 const itemId = $(this).data('id');
                 const action = $(this).data('action');
-                const cantidad = parseInt($(this).siblings('input').val());
-
-                if (action === 'decrease' && cantidad === 1) {
+                const input = $(this).siblings('input');
+                const currentQuantity = parseInt(input.val());
+        
+                if (action === 'decrease' && currentQuantity === 1) {
                     if (!confirm('¿Deseas eliminar este producto del carrito?')) {
                         return;
                     }
                 }
-
+        
                 $.ajax({
                     url: '/ecar/api/update-cart/',
                     method: 'POST',
-                    data: {
+                    contentType: 'application/json',
+                    data: JSON.stringify({
                         'item_id': itemId,
                         'action': action,
-                        'csrfmiddlewaretoken': '{{ csrf_token|escapejs }}'
+                    }),
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token|escapejs }}',
                     },
-                    success: function () {
-                        location.reload();
-                    }
-                });
-            });
-
-            // Eliminar producto del carrito
-            $('.remove-item').click(function () {
-                const itemId = $(this).data('id');
-                $.ajax({
-                    url: '/ecar/api/remove-from-cart/',
-                    method: 'POST',
-                    data: {
-                        'item_id': itemId,
-                        'csrfmiddlewaretoken': '{{ csrf_token|escapejs }}'
+                    success: function (response) {
+                        if (response.success) {
+                            if (action === 'increase') {
+                                input.val(currentQuantity + 1);
+                            } else if (action === 'decrease') {
+                                if (currentQuantity > 1) {
+                                    input.val(currentQuantity - 1);
+                                } else {
+                                    location.reload();
+                                }
+                            }
+                        } else {
+                            alert(response.message); // Mostrar mensaje de error
+                        }
                     },
-                    success: function () {
-                        location.reload();
+                    error: function (xhr) {
+                        const response = JSON.parse(xhr.responseText);
+                        alert(response.message || 'Ocurrió un error al actualizar el producto.');
                     }
                 });
             });
         });
+        
+        
     </script>
+    <script>
+        document.querySelector('#add-to-cart-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+        
+            fetch("{% url 'agregar_al_carrito' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message); // Mostrar mensaje de éxito
+                    // Opcional: actualizar la UI, como el contador del carrito
+                } else {
+                    alert(data.message); // Mostrar mensaje de error
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        </script>
 </body>
 </html>
 {% endblock %}
