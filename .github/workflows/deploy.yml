@@ -1,0 +1,61 @@
+name: Deploy Django on Windows
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            # Variables de entorno
+            $PROJECT_DIR=C:\deployments\mierp\env\mierp-TI1A
+            $VENV_DIR=C:\deployments\mierp\env
+            $NGINX_CONF=$PROJECT_DIR\deploy\nginx.conf
+            $NGINX_PATH=C:\nginx-1.27.3
+
+            # 1. Navegar al directorio del proyecto
+            cd $PROJECT_DIR
+
+            # 2. Actualizar el repositorio
+            git pull origin main
+
+            # 3. Activar el entorno virtual y actualizar dependencias
+            source $VENV_DIR\Scripts\activate
+            cd $PROJECT_DIR\mierpti1a
+            pip install -r requirements.txt
+
+            # 4. Migrar la base de datos y recopilar estáticos
+            python manage.py migrate
+            python manage.py collectstatic --noinput
+
+            # 5. Detener Waitress
+            taskkill /f /im waitress-serve.exe || echo "Waitress not running"
+
+            # 6. Iniciar Waitress
+            start /b waitress-serve --host=0.0.0.0 --port=8000 --threads=8 mierpti1a.wsgi:application
+
+            # 7. Configurar Nginx
+            echo "Configurando Nginx"
+            copy /y $NGINX_CONF $NGINX_PATH\conf\nginx.conf
+
+            # 7.2 Recargar Nginx
+            if $NGINX_PATH\nginx.exe -s reload; then
+              echo "Nginx recargado correctamente"
+            else
+              echo "Error al recargar Nginx"
+              #  Podrías registrar el error en un archivo
+            fi

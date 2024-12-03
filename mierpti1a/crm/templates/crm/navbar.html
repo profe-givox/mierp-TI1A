@@ -10,15 +10,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'faqs' %}">Preguntas Frecuentes</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'comunity' %}">Comunidad</a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Obtener Soporte
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Abrir ticket</a></li>
+                            <li><a class="dropdown-item" href="{% url 'allTickets' %}">Abrir ticket</a></li>
                             <li><a class="dropdown-item" href="#">Abrir chat</a></li>
                         </ul>
                     </li>

@@ -1,4 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
+from RRHH.models import Empleado
+from inventory.models import Producto
+from django.db import models
+import shortuuid
 
 # ------------------------------------------------------------------------------------
 # MODELOS RELACIONADOS CON EL MÓDULO DE PREGUNTAS FRECUENTES, ARTÍCULOS Y GUÍAS 
@@ -31,7 +36,7 @@ class FAQArticle(models.Model):
 # ------------------------------------------------------------------------------------
 
 # Modelo de usuario para tener su información básica
-class User(models.Model):
+class UserPublic(models.Model):
     name = models.CharField(max_length=60)
     lastName = models.CharField(max_length=60)
     email = models.EmailField()
@@ -68,7 +73,7 @@ class Ticket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE) # Usuario que abrió el ticket
-    assigned_to = models.ForeignKey(SupportAgent, on_delete=models.SET_NULL, null=True, blank=True) # Agente asignado, puede ser nulo
+    assigned_to = models.ForeignKey(Empleado, on_delete=models.SET_NULL, null=True, blank=True, related_name='tickets_asignados') # Agente asignado, puede ser nulo
 
     def __str__(self):
         return f"{self.title} ({self.status})"
@@ -193,3 +198,64 @@ class Report(models.Model):
     # Campos para el periodo de dodnde pertenecen los datos
     start_date = models.DateTimeField()  # Fecha de inicio
     end_date = models.DateTimeField()  # Fecha de finalización
+
+
+# ------------------------------------------------------------------------------------
+# MODELOS RELACIONADOS CON EL MÓDULO CHAT ONLINE
+# ------------------------------------------------------------------------------------
+
+class ChatGroup(models.Model):
+    group_name = models.CharField(max_length=128, unique=True, default=shortuuid.uuid)
+    users_online = models.ManyToManyField(User, related_name= 'online_in_groups', blank=True)
+    members = models.ManyToManyField(User, related_name='chat_groups', blank=True)
+    is_private = models.BooleanField(default=False)  # Este es el campo que se usa
+
+
+    def __str__(self):
+        return self.group_name
+    
+    
+class GroupMessage(models.Model):
+    group = models.ForeignKey(ChatGroup, related_name='chat_messages',on_delete= models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.CharField(max_length=300, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'{self.author.username}:{self.body}'
+    
+    class Meta:
+        ordering = ['-created']
+
+
+# ------------------------------------------------------------------------------------
+# MODELO RELACIONADO A LA API DE COMUNICACIÓN DE CRM Y PRODUCTOS DE LA TIENDA EN LÍNEA
+# ------------------------------------------------------------------------------------
+
+class Reseña(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='reseñas')
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reseñas')
+    calificacion = models.IntegerField()  # Calificación numérica entre 1 y 5
+    texto = models.TextField()  # Campo para el texto de la reseña
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reseña de {self.usuario} sobre {self.producto}"
+
+    def clean(self):
+        """Valida que la calificación esté entre 1 y 5."""
+        from django.core.exceptions import ValidationError
+        if not (1 <= self.calificacion <= 5):
+            raise ValidationError('La calificación debe estar entre 1 y 5.')
+        
+    class Meta:
+        unique_together = ('producto', 'usuario')
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(calificacion__gte=1) & models.Q(calificacion__lte=5),
+                name='calificacion_valida'
+            )
+        ] 
+        ordering = ['-fecha_creacion']  # Ordenar por fecha de creación descendente
+
+

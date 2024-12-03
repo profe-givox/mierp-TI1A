@@ -1,0 +1,27 @@
+{% if message.author == user %}
+<li class="message-item message-item--right">
+    <div class="message-bubble message-bubble--me">
+        <span>{{ message.body }}</span>
+        <span class="message-time">{{ message.created|time:"H:i" }}</span> <!-- Hora -->
+    </div>
+    <svg class="message-arrow message-arrow--me" height="13" width="8">
+        <path fill="#bbf7d0" d="M6.3,10.4C1.5,8.7,0.9,5.5,0,0.2L0,13l5.2,0C7,13,9.6,11.5,6.3,10.4z"/>
+    </svg>
+</li>
+{% else %}
+<li class="message-item">
+    <div class="message-user">
+        <div class="message-info">
+            <span class="message-info__name">{{ message.author.profile.name }}</span>
+            <span class="message-info__username">@{{ message.author.username }}</span>
+        </div>
+    </div>
+    <div class="message-bubble message-bubble--other">
+        <span>{{ message.body }}</span>
+        <span class="message-time">{{ message.created|time:"H:i" }}</span> <!-- Hora -->
+    </div>
+    <svg class="message-arrow message-arrow--other" height="13" width="8">
+        <path fill="white" d="M2.8,13L8,13L8,0.2C7.1,5.5,6.5,8.7,1.7,10.4C-1.6,11.5,1,13,2.8,13z"></path>
+    </svg>
+</li>
+{% endif %}
