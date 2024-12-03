@@ -1,0 +1,177 @@
+/* Estilos generales del chat */
+.chat-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  background-color: #242526;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.chat-header {
+  background-color: #3A3B3C;
+  color: #E4E6EB;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.online-count {
+  color: #b9bbbe;
+  font-size: 14px;
+}
+
+.chat-body {
+  padding: 20px;
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.chat-footer {
+  background-color: #3A3B3C;
+  padding: 10px;
+}
+
+.chat-footer input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #242526;
+  color: #E4E6EB;
+}
+
+/* Media Queries */
+@media (max-width: 700px) {
+  .chat-container {
+    width: 100%;
+    margin: 10px;
+  }
+
+  .chat-body {
+    height: 250px;
+  }
+}
+
+/* Estilos para los mensajes */
+.message-item {
+  display: flex;
+  align-items: center; /* Centra el contenido verticalmente */
+  margin-bottom: 5px; /* Menor espacio entre mensajes */
+}
+
+.message-item--right {
+  justify-content: flex-end;
+}
+
+.message-user {
+  margin-right: 5px; /* Menor separación entre avatar y mensaje */
+}
+
+.user-avatar img {
+  width: 25px; /* Tamaño más pequeño */
+  height: 25px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 5px; /* Reducir espacio entre avatar y mensaje */
+}
+
+/* Información del usuario */
+.message-info {
+  display: flex;
+  flex-direction: column; /* Nombre y usuario en columna */
+  align-items: flex-start; /* Alinear a la izquierda */
+  margin-bottom: 2px; /* Menor separación debajo del usuario */
+}
+
+.message-info__name {
+  font-size: 0.8em; /* Más pequeño */
+  font-weight: bold;
+  color: #E4E6EB;
+}
+
+.message-info__username {
+  font-size: 0.7em; /* Más pequeño */
+  color: #b9bbbe;
+}
+
+/* Estilos de las burbujas de mensajes */
+.message-bubble {
+  position: relative;
+  background-color: #e9ecef; /* Color base */
+  color: #343a40;
+  padding: 8px; /* Reducido para diseño compacto */
+  border-radius: 10px;
+  border-color: #242526;
+  max-width: 100%;
+  word-break: break-word;
+  margin: 3px 0; /* Menor espacio entre burbujas */
+}
+
+.message-bubble--me {
+  background-color: #9ee688; /* Color para mensajes propios */
+  color: rgb(8, 8, 8);
+  margin-right: 10px; /* Ajustar separación lateral */
+}
+
+.message-bubble--other {
+  margin-left: 10px; /* Ajustar separación lateral */
+}
+
+.message-arrow {
+  fill: #df1c9e;
+  margin-left: 5px;
+}
+
+.message-arrow--me {
+  fill: #bbf7d0;
+  margin-right: 5px;
+  margin-left: 0;
+  transform: scaleX(-1);
+}
+
+/* Estilo para la hora */
+.message-time {
+  display: block; /* Línea separada */
+  font-size: 0.7em; /* Más pequeña */
+  color: #9a9a9a; /* Color tenue */
+  text-align: right;
+  margin-top: 3px; /* Menor espacio encima */
+}
+
+/* Estilo para mensajes propios */
+.message-bubble--primary {
+  background-color: #9ee688;
+  color: rgb(8, 8, 8);
+}
+
+
+.chat-header-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.chat-header-link:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Efecto al pasar el cursor */
+}
+
+.button-container {
+  position: relative; /* Para posicionar el botón */
+}
+
+#nav-item-chat-soporte {
+  position: absolute;
+  top: 10px; /* Ajusta la distancia desde la parte superior */
+  right: 10px; /* Ajusta la distancia desde la derecha */
+  list-style: none; /* Elimina el punto de la lista */
+}
+
+#nav-item-chat-soporte button {
+  background-color: #007bff; /* Color de fondo del botón */
+  color: white;
+  border: none;
+  padding: 8px 16px; /* Ajusta el padding */
+  border-radius: 5px; /* Ajusta el radio del borde */
+  cursor: pointer; /* Cambia el cursor al pasar el ratón */
+}
