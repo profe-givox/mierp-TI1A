@@ -1,0 +1,39 @@
+{% extends 'ecar/base.html' %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ producto.nombre }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/producto.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ producto.nombre }}</h1>
+        <img src="{% static 'img/' %}{{ producto.imagen }}" class="img-fluid" alt="{{ producto.nombre }}">
+        <p>{{ producto.descripcion }}</p>
+        <p><strong>Precio: ${{ producto.precio_unitario }}</strong></p>
+        {% if producto.descuento > 0 %}
+            <p class="text-danger">Descuento: {{ producto.descuento }}%</p>
+            <p><strong>Precio con Descuento: ${{ producto.precio_con_descuento|floatformat:2 }}</strong></p>
+        {% endif %}
+        <p>Stock: {{ producto.stock }}</p>
+        <a href="{% url 'catalogo' %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <form action="{% url 'agregar_al_carrito' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+            <input type="hidden" name="cantidad" value="1">
+            <button type="submit" class="btn btn-outline-success btn-sm">
+                Añadir al carrito <i class="bi bi-cart-plus"></i>
+            </button>
+        </form>
+    </div>
+</body>
+</html>
+{% endblock %}

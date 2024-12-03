@@ -1,0 +1,52 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Soporte{% endblock %}
+
+{% block content %}
+    <!-- Contenedor principal -->
+    <div class="container mt-4 text-center">
+        <!-- Título central -->
+        <h1 class="display-4 mb-5">Bienvenido al sitio de soporte</h1>
+
+        <!-- Barra de búsqueda -->
+        <h3 class="mb-3">Buscar más temas</h3>
+        <div class="input-group mb-5 mx-auto" style="max-width: 600px;">
+            <span class="input-group-text" id="basic-addon1">
+                <i class="bi bi-search"></i>
+            </span>
+            <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Buscar en Soporte" 
+                aria-label="Buscar en Soporte" 
+                aria-describedby="basic-addon1">
+        </div>
+
+        <!-- Tarjetas de artículos FAQ -->
+        <div class="row">
+            {% for article in faq_articles %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ article.title }}</h5>
+                            <p class="card-text">{{ article.content|truncatewords:20 }}</p>
+                            <p class="card-text"><small class="text-muted">Categoría: {{ article.category.name }}</small></p>
+                            <a href="#" class="btn btn-primary">Leer más</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No hay artículos de soporte disponibles en este momento.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Botón flotante para el chatbot -->
+        <button 
+            type="button" 
+            class="btn btn-primary btn-lg rounded-circle position-fixed" 
+            style="bottom: 20px; right: 20px;" 
+            onclick="(() => console.log('Chatbot activado'))()">
+            💬
+        </button>
+    </div>
+{% endblock %}

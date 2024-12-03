@@ -1,0 +1,45 @@
+.col-md-4 {
+    flex: 0 0 300px;
+    /* Ajusta el ancho de la columna a 200px */
+}
+
+.card {
+    width: 100%;
+    /* Haz que la tarjeta ocupe el 100% del ancho de la columna */
+}
+
+.card-img-top {
+    display: block;
+    margin: 0 auto;
+    /* Centra la imagen dentro del div */
+    width: 100%;
+    /* Hace que la imagen ocupe todo el ancho disponible */
+    height: 200px;
+    /* Mantén la altura de la imagen */
+}
+
+.card-text {
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
+    overflow: hidden;
+    /* Oculta el texto que se sale del contenedor */
+    text-overflow: ellipsis;
+    /* Muestra "..." cuando el texto se corta */
+    max-width: 100%;
+    /* Asegura que el texto no sobrepase el ancho del contenedor */
+    position: relative;
+    /* Para el tooltip */
+
+}
+
+p {
+    width: 250px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.card-img-top:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}

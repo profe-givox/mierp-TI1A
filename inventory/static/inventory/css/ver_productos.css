@@ -1,0 +1,54 @@
+/* Filtro y barra de búsqueda */
+form.d-flex {
+    justify-content: flex-start;
+    gap: 1rem;
+    align-items: center;
+}
+
+form .form-select, form .form-control {
+    max-width: 200px;
+}
+
+form .btn {
+    height: 38px;
+    padding: 0 20px;
+    background-color: #5c6bc0; /* Mismo color base que Buscar */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+form .btn:hover {
+    background-color: #3949ab; /* Mismo color hover que Buscar */
+}
+
+/* Botones de acciones en tablas */
+table .btn {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+table .btn-success {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+}
+
+table .btn-success:hover {
+    background-color: #4cae4c;
+}
+
+/* Botón de productos con stock bajo */
+table .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+table .btn-danger:hover {
+    background-color: #c82333;
+}

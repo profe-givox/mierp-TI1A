@@ -1,0 +1,122 @@
+{% extends 'ecar/base.html' %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1>Carrito de Compras</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in productos_carrito %}
+                <tr>
+                    <td>
+                        <img src="{% static 'img/' %}{{ item.imagen }}" alt="{{ item.nombre|escape }}" class="img-thumbnail" style="width: 100px; height: auto;">
+                    </td>
+                    <td>{{ item.nombre|escape }}</td>
+                    <td>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id|escape }}" data-action="decrease">-</button>
+                            <input type="text" class="form-control text-center" value="{{ item.cantidad|escape }}" readonly style="width: 40px;">
+                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id|escape }}" data-action="increase">+</button>
+                        </div>
+                    </td>
+                    <td>
+                        {% if item.precio_unitario > item.precio_con_descuento %}
+                            <del>${{ item.precio_unitario|floatformat:2 }}</del><br>
+                            <strong>${{ item.precio_con_descuento|floatformat:2 }}</strong>
+                        {% else %}
+                            ${{ item.precio_unitario|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-danger btn-sm remove-item" data-id="{{ item.id|escape }}">Eliminar</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No tienes productos en el carrito.</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><strong>Total</strong></td>
+                    <td><strong>${{ total|floatformat:2 }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'catalogo' %}" class="btn btn-primary">Seguir comprando</a>
+            <form method="post" action="/payments/pagos/">
+                {% csrf_token %}
+                <input type="hidden" name="amount" id="amount" value="{{ total|floatformat:2 }}">
+                <button type="submit" class="btn btn-success">Pagar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Actualizar cantidad del producto
+            $('.update-quantity').click(function () {
+                const itemId = $(this).data('id');
+                const action = $(this).data('action');
+                const cantidad = parseInt($(this).siblings('input').val());
+
+                if (action === 'decrease' && cantidad === 1) {
+                    if (!confirm('¿Deseas eliminar este producto del carrito?')) {
+                        return;
+                    }
+                }
+
+                $.ajax({
+                    url: '/ecar/api/update-cart/',
+                    method: 'POST',
+                    data: {
+                        'item_id': itemId,
+                        'action': action,
+                        'csrfmiddlewaretoken': '{{ csrf_token|escapejs }}'
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+
+            // Eliminar producto del carrito
+            $('.remove-item').click(function () {
+                const itemId = $(this).data('id');
+                $.ajax({
+                    url: '/ecar/api/remove-from-cart/',
+                    method: 'POST',
+                    data: {
+                        'item_id': itemId,
+                        'csrfmiddlewaretoken': '{{ csrf_token|escapejs }}'
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

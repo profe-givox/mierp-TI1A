@@ -1,0 +1,60 @@
+{% extends 'ecar/base.html' %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="my-4">Catálogo de Productos</h1>
+        <div class="row">
+            {% for producto in productos %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/static/img/{{ producto.imagen }}" class="card-img-top img-thumbnail" alt="{{ producto.nombre }}" style="height: 200px; width: auto;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text" data-full-text="{{ producto.descripcion }}">
+                            {{ producto.descripcion }}
+                        </p>
+                        {% if producto.descuento > 0 %}
+                            <p class="card-text text-danger"><strong>Descuento: {{ producto.descuento }}%</strong></p>
+                            <p class="card-text"><strong>Precio Original: <del>${{ producto.precio_unitario }}</del></strong></p>
+                            <p class="card-text"><strong>Precio con Descuento: ${{ producto.precio_con_descuento|floatformat:2 }}</strong></p>
+
+                        {% else %}
+                            <p class="card-text"><strong>${{ producto.precio_unitario }}</strong></p>
+                            <p class="card-text"><strong>‎ </strong></p>
+                            <p class="card-text"><strong>‎ </strong></p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                            <form action="{% url 'agregar_al_carrito' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                <input type="hidden" name="cantidad" value="1">
+                                <button type="submit" class="btn btn-outline-success btn-sm">
+                                    Añadir al carrito <i class="bi bi-cart-plus"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endblock %}
+    </div>
+    
+</body>
+</html>
