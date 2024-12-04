@@ -206,9 +206,6 @@ def carrito(request):
     })
 
 
-
-
-
 @login_required(login_url='/ecar/login/')
 def agregar_al_carrito(request):
     if request.method == 'POST':
@@ -237,6 +234,7 @@ def agregar_al_carrito(request):
             carrito=carrito,
             producto=producto
         )
+        
         if not created:
             carrito_producto.cantidad += 1
         else:

@@ -28,14 +28,14 @@
                 {% for item in productos_carrito %}
                 <tr>
                     <td>
-                        <img src="{% static 'img/' %}{{ item.imagen }}" alt="{{ item.nombre }}" class="img-thumbnail" style="width: 100px; height: auto;">
+                        <img src="{% static 'img/' %}{{ item.imagen }}" alt="{{ item.nombre|escape }}" class="img-thumbnail" style="width: 100px; height: auto;">
                     </td>
-                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.nombre|escape }}</td>
                     <td>
                         <div class="input-group">
-                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id }}" data-action="decrease">-</button>
-                            <input type="text" class="form-control text-center" value="{{ item.cantidad }}" readonly style="width: 40px;">
-                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id }}" data-action="increase">+</button>
+                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id|escape }}" data-action="decrease">-</button>
+                            <input type="text" class="form-control text-center" value="{{ item.cantidad|escape }}" readonly style="width: 40px;">
+                            <button class="btn btn-outline-secondary btn-sm update-quantity" data-id="{{ item.id|escape }}" data-action="increase">+</button>
                         </div>
                     </td>
                     <td>
@@ -47,7 +47,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <button class="btn btn-danger btn-sm remove-item" data-id="{{ item.id }}">Eliminar</button>
+                        <button class="btn btn-danger btn-sm remove-item" data-id="{{ item.id|escape }}">Eliminar</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -64,7 +64,11 @@
 
         <div class="d-flex justify-content-between">
             <a href="{% url 'catalogo' %}" class="btn btn-primary">Seguir comprando</a>
-            <a href="#" class="btn btn-success">Pagar</a>
+            <form method="post" action="/payments/pagos/">
+                {% csrf_token %}
+                <input type="hidden" name="amount" id="amount" value="{{ total|floatformat:2 }}">
+                <button type="submit" class="btn btn-success">Pagar</button>
+            </form>
         </div>
     </div>
 
@@ -88,7 +92,7 @@
                     data: {
                         'item_id': itemId,
                         'action': action,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        'csrfmiddlewaretoken': '{{ csrf_token|escapejs }}'
                     },
                     success: function () {
                         location.reload();
@@ -104,7 +108,7 @@
                     method: 'POST',
                     data: {
                         'item_id': itemId,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        'csrfmiddlewaretoken': '{{ csrf_token|escapejs }}'
                     },
                     success: function () {
                         location.reload();

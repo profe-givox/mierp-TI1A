@@ -3,252 +3,282 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Producto, UbicacionProducto, Almacen
 import json
 from django.db import models
+from .models import Pedido, StockEnPedido, MovimientoInventario
+from django.utils.timezone import now
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 
-# Vista personalizada de login
-class CustomLoginView(LoginView):
-    template_name = 'inventory/login.html'
-
-# Vistas para renderizar las plantillas HTML
-def product_form(request):
-    return render(request, 'inventory/product_form.html')
-
-def editar_producto(request):
-    almacenes = Almacen.objects.all() 
-    return render(request, 'inventory/editar_producto.html', {'almacenes': almacenes})
-
-
-def eliminar_producto(request):
-    return render(request, 'inventory/eliminar_producto.html')
-
-def ventas(request):
-    return render(request, 'inventory/ventas.html')
-
-def pedidos(request):
-    return render(request, 'inventory/pedidos.html')
-
-def nuevo_pedido(request):
-    return render(request, 'inventory/nuevo_pedido.html')
-
-def editar_pedido(request):
-    return render(request, 'inventory/editar_pedido.html')
-
-def eliminar_pedido(request):
-    return render(request, 'inventory/eliminar_pedido.html')
 
 def ver_productos(request):
     return render(request, 'inventory/ver_productos.html')
 
-# API CRUD para Productos
 
-from django.db.models import Prefetch
+def control_inventarios(request):
+    return render(request, 'inventory/control_inventarios.html')
 
-from django.http import JsonResponse
-from django.db.models import Q
-from .models import Producto
+def gestion_pedidos(request):
+    return render(request, 'inventory/gestion_pedidos.html')
 
-def buscar_producto(request):
-    search_query = request.GET.get('search', '').strip()
-    if search_query:
-        producto = Producto.objects.filter(
-            Q(codigo_producto__icontains=search_query) | Q(nombre_producto__icontains=search_query)
-        ).first()
+def control_entradas_salidas(request):
+    return render(request, 'inventory/control_entradas_salidas.html')
 
-        if producto:
-            data = {
-                'id': producto.id,  # Añadir el ID del producto aquí
-                'codigo_producto': producto.codigo_producto,
-                'nombre_producto': producto.nombre_producto,
-                'proveedor': producto.proveedor,
-                'categoria': producto.categoria,
-                'cantidad_por_unidad': producto.cantidad_por_unidad,
-                'precio_unitario': str(producto.precio_unitario),
-                'unidades_en_existencia': producto.unidades_en_existencia,
-                'unidades_en_pedido': producto.unidades_en_pedido,
-                'nivel_reorden': producto.nivel_reorden,
-                'almacen': producto.ubicacionproducto_set.first().almacen.nombre if producto.ubicacionproducto_set.exists() else '',
-                'estante': producto.ubicacionproducto_set.first().estante if producto.ubicacionproducto_set.exists() else '',
-                'lugar': producto.ubicacionproducto_set.first().lugar if producto.ubicacionproducto_set.exists() else ''
-            }
-            return JsonResponse({'producto': data})
-        else:
-            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
-    else:
-        return JsonResponse({'error': 'No se proporcionó un término de búsqueda'}, status=400)
-
-# Listar productos con opción de búsqueda
-def listar_productos(request):
-    if request.method == 'GET':
-        search_query = request.GET.get('search', '')  # Obtener el parámetro de búsqueda
-        if search_query:
-            # Filtrar productos por código o nombre que coincidan con el criterio de búsqueda
-            productos = Producto.objects.filter(
-                models.Q(codigo_producto__icontains=search_query) |
-                models.Q(nombre_producto__icontains=search_query)
-            )
-        else:
-            productos = Producto.objects.all()
-
-        # Usar Prefetch para traer las ubicaciones y almacenes asociados
-        productos = productos.prefetch_related(
-            Prefetch(
-                'ubicacionproducto_set',
-                queryset=UbicacionProducto.objects.select_related('almacen')
-            )
-        )
-
-        # Construir la respuesta JSON
-        productos_data = []
-        for producto in productos:
-            ubicacion_producto = producto.ubicacionproducto_set.first()  # Asume una ubicación por producto
-            productos_data.append({
-                'codigo_producto': producto.codigo_producto,
-                'nombre_producto': producto.nombre_producto,
-                'proveedor': producto.proveedor,
-                'categoria': producto.categoria,
-                'cantidad_por_unidad': producto.cantidad_por_unidad,
-                'precio_unitario': str(producto.precio_unitario),
-                'unidades_en_existencia': producto.unidades_en_existencia,
-                'unidades_en_pedido': producto.unidades_en_pedido,
-                'nivel_reorden': producto.nivel_reorden,
-                'almacen': ubicacion_producto.almacen.nombre if ubicacion_producto else '',
-                'ubicacion_almacen': ubicacion_producto.almacen.ubicacion if ubicacion_producto else '',
-                'estante': ubicacion_producto.estante if ubicacion_producto else '',
-                'lugar': ubicacion_producto.lugar if ubicacion_producto else ''
-            })
-
-        return JsonResponse({'productos': productos_data})
-
-
-
-# Crear producto
-from django.db import transaction
+def informes_analisis(request):
+    return render(request, 'inventory/informes_analisis.html')
 
 @csrf_exempt
-def crear_producto(request):
+def agregar_pedido(request):
+    """
+    Vista para agregar un pedido.
+    """
     if request.method == 'POST':
         try:
+            # Log para depuración
+            print("Datos recibidos en el POST:", request.body)
+
+            # Parsear los datos del cuerpo de la solicitud
             data = json.loads(request.body)
+            producto_id = data.get('producto_id')
+            cantidad = data.get('cantidad')
 
-            # Verificar si el código de producto ya existe
-            codigo_producto = data.get('codigo_producto')
-            if Producto.objects.filter(codigo_producto=codigo_producto).exists():
-                return JsonResponse({'error': 'Este código de producto ya existe'}, status=400)
+            # Validación de datos
+            if not producto_id or not cantidad or cantidad <= 0:
+                return JsonResponse({'error': 'Producto ID y cantidad válidos son requeridos.'}, status=400)
 
-            # Iniciar una transacción atómica
-            with transaction.atomic():
-                # Crear el producto
-                producto = Producto.objects.create(
-                    codigo_producto=codigo_producto,
-                    nombre_producto=data['nombre'],
-                    proveedor=data['proveedor'],
-                    categoria=data['categoria'],
-                    cantidad_por_unidad=data['cantidad_por_unidad'],
-                    precio_unitario=data['precio_unitario'],
-                    unidades_en_existencia=data['unidades_en_existencia'],
-                    unidades_en_pedido=data['unidades_en_pedido'],
-                    nivel_reorden=data['nivel_reorden']
-                )
+            # Crear el pedido
+            nuevo_pedido = Pedido.objects.create(
+                producto_id=producto_id,
+                cantidad=cantidad,
+                estado='pendiente'
+            )
 
-                # Verificar si el almacen_id es válido
-                almacen_id = data.get('almacen')
-                if not almacen_id:
-                    raise ValueError('Debes seleccionar un almacén')
+            # Actualizar o crear el registro de StockEnPedido
+            stock_pedido, created = StockEnPedido.objects.get_or_create(producto_id=producto_id)
+            stock_pedido.cantidad_en_pedido += cantidad
+            stock_pedido.save()
 
-                # Crear la ubicación del producto
-                almacen = get_object_or_404(Almacen, id=almacen_id)
-                UbicacionProducto.objects.create(
-                    producto=producto,
-                    almacen=almacen,
-                    estante=data['estante'],
-                    lugar=data['lugar']
-                )
-
-            return JsonResponse({'mensaje': 'Producto creado exitosamente', 'producto_id': producto.id}, status=201)
+            print("Pedido creado exitosamente.")
+            return JsonResponse({
+                'mensaje': 'Pedido agregado exitosamente.',
+                'pedido': {
+                    'id': nuevo_pedido.id,
+                    'producto_id': nuevo_pedido.producto_id,
+                    'cantidad': nuevo_pedido.cantidad,
+                    'fecha_pedido': nuevo_pedido.fecha_pedido.strftime('%Y-%m-%d %H:%M:%S'),
+                },
+                'stock_en_pedido': stock_pedido.cantidad_en_pedido
+            })
 
         except Exception as e:
-            print(f"Error al crear el producto: {e}")
-            return JsonResponse({'error': f'Error al crear el producto: {str(e)}'}, status=500)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+            print(f"Error procesando el pedido: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
 
+
+def obtener_pedidos(request):
+    """
+    Devuelve un diccionario con los totales de pedidos por producto_id.
+    """
+    try:
+        # Obtener todos los registros en StockEnPedido y sumar los pedidos por producto_id
+        pedidos = StockEnPedido.objects.values('producto_id').annotate(total_pedido=models.Sum('cantidad_en_pedido'))
+        pedidos_dict = {pedido['producto_id']: pedido['total_pedido'] for pedido in pedidos}
+
+        return JsonResponse({'pedidos': pedidos_dict}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+def obtener_pedidos_completo(request):
+    """
+    View para obtener la lista completa de pedidos con todos los detalles.
+    """
+    pedidos = Pedido.objects.all().values(
+        'id', 'producto_id', 'cantidad', 'proveedor', 'estado', 'fecha_pedido', 'fecha_entrega'
+    )
+    pedidos_list = []
+    for pedido in pedidos:
+        pedidos_list.append({
+            'id': pedido['id'],
+            'producto_id': pedido['producto_id'],
+            'cantidad': pedido['cantidad'],
+            'proveedor': pedido['proveedor'],
+            'estado': pedido['estado'],
+            'fecha_pedido': pedido['fecha_pedido'].strftime('%Y-%m-%d %H:%M:%S') if pedido['fecha_pedido'] else None,
+            'fecha_entrega': pedido['fecha_entrega'].strftime('%Y-%m-%d %H:%M:%S') if pedido['fecha_entrega'] else None,
+        })
+    return JsonResponse({'pedidos': pedidos_list})
 
 
 @csrf_exempt
-def actualizar_producto(request, producto_id):
-    if request.method == 'PUT':
+def marcar_entregado(request, pedido_id):
+    """
+    Vista para marcar un pedido como entregado y actualizar StockEnPedido.
+    """
+    if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            producto = get_object_or_404(Producto, id=producto_id)
-            
-            # Actualizar campos del producto
-            producto.codigo_producto = data.get('codigo_producto', producto.codigo_producto)
-            producto.nombre_producto = data.get('nombre', producto.nombre_producto)
-            producto.proveedor = data.get('proveedor', producto.proveedor)
-            producto.categoria = data.get('categoria', producto.categoria)
-            producto.cantidad_por_unidad = data.get('cantidad_por_unidad', producto.cantidad_por_unidad)
-            producto.precio_unitario = data.get('precio_unitario', producto.precio_unitario)
-            producto.unidades_en_existencia = data.get('unidades_en_existencia', producto.unidades_en_existencia)
-            producto.unidades_en_pedido = data.get('unidades_en_pedido', producto.unidades_en_pedido)
-            producto.nivel_reorden = data.get('nivel_reorden', producto.nivel_reorden)
-            producto.save()
+            pedido = Pedido.objects.get(id=pedido_id)
 
-            # Actualizar ubicación del producto
-            almacen_id = data.get('almacen')
-            estante = data.get('estante')
-            lugar = data.get('lugar')
+            if pedido.estado == 'entregado':
+                return JsonResponse({'error': 'El pedido ya está marcado como entregado.'}, status=400)
 
-            if almacen_id:
-                almacen = get_object_or_404(Almacen, id=almacen_id)
-                ubicacion_producto, created = UbicacionProducto.objects.update_or_create(
-                    producto=producto,
-                    defaults={
-                        'almacen': almacen,
-                        'estante': estante,
-                        'lugar': lugar
-                    }
+            # Actualizar el estado y la fecha de entrega
+            pedido.estado = 'entregado'
+            pedido.fecha_entrega = now()
+            pedido.save()
+
+            # Actualizar el stock en pedidos
+            stock_pedido = StockEnPedido.objects.get(producto_id=pedido.producto_id)
+            stock_pedido.cantidad_en_pedido -= pedido.cantidad
+            if stock_pedido.cantidad_en_pedido <= 0:
+                stock_pedido.delete()
+            else:
+                stock_pedido.save()
+
+            return JsonResponse({
+                'mensaje': f'Pedido {pedido_id} marcado como entregado exitosamente.',
+                'producto_id': pedido.producto_id,
+                'cantidad_actualizada': stock_pedido.cantidad_en_pedido if stock_pedido.pk else 0
+            })
+        except Pedido.DoesNotExist:
+            return JsonResponse({'error': 'El pedido no existe.'}, status=404)
+        except StockEnPedido.DoesNotExist:
+            return JsonResponse({'error': 'No existe registro en StockEnPedido para este producto.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+@csrf_exempt
+def registrar_salida(request, pedido_id):
+    if request.method == 'POST':
+        try:
+            pedido = Pedido.objects.get(id=pedido_id, estado='entregado')
+
+            # Registrar la salida
+            MovimientoInventario.objects.create(
+                producto_id=pedido.producto_id,
+                tipo='salida',
+                cantidad=pedido.cantidad,
+                fecha=now(),
+                sucursal_id=1,  # Cambia a la sucursal correspondiente
+                pedido=pedido
+            )
+
+            return JsonResponse({
+                'mensaje': f'Pedido {pedido_id} enviado a sucursal exitosamente.',
+                'producto_id': pedido.producto_id,
+                'cantidad': pedido.cantidad
+            })
+        except Pedido.DoesNotExist:
+            return JsonResponse({'error': 'El pedido no existe o no está marcado como entregado.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+
+
+
+def obtener_movimientos(request):
+    """
+    Devuelve los movimientos de inventario filtrados por tipo, fechas o todos.
+    """
+    if request.method == 'GET':
+        try:
+            # Obtener los parámetros de consulta
+            tipo = request.GET.get('tipo', None)  # 'entrada', 'salida' o None
+            fecha_inicio = request.GET.get('fecha_inicio', None)
+            fecha_fin = request.GET.get('fecha_fin', None)
+
+            # Base QuerySet
+            movimientos = MovimientoInventario.objects.all()
+
+            # Filtrar por tipo si está presente
+            if tipo in ['entrada', 'salida']:
+                movimientos = movimientos.filter(tipo=tipo)
+
+            # Filtrar por rango de fechas si están presentes
+            if fecha_inicio and fecha_fin:
+                movimientos = movimientos.filter(
+                    fecha__range=[fecha_inicio, fecha_fin]
                 )
 
-            return JsonResponse({'mensaje': 'Producto y ubicación actualizados exitosamente'})
+            # Construir la respuesta
+            data = [
+                {
+                    'id': movimiento.id,
+                    'producto_id': movimiento.producto_id,
+                    'tipo': movimiento.tipo,
+                    'cantidad': movimiento.cantidad,
+                    'fecha': movimiento.fecha,
+                    'sucursal_id': movimiento.sucursal_id,
+                    'pedido_id': movimiento.pedido.id if movimiento.pedido else None,
+                }
+                for movimiento in movimientos
+            ]
+
+            return JsonResponse({'movimientos': data}, status=200)
 
         except Exception as e:
-            print(f"Error al actualizar el producto: {e}")
-            return JsonResponse({'error': f'Error al actualizar el producto: {str(e)}'}, status=500)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
 
-
-
-
-# Eliminar producto
 @csrf_exempt
-def eliminar_producto_api(request, producto_id):
-    if request.method == 'DELETE':
+def registrar_entrada(request, pedido_id):
+    """
+    Vista para registrar una entrada en el inventario al marcar un pedido como entregado.
+    """
+    if request.method == 'POST':
         try:
-            producto = get_object_or_404(Producto, id=producto_id)
-            producto.delete()
-            return JsonResponse({'mensaje': 'Producto eliminado exitosamente'})
+            pedido = Pedido.objects.get(id=pedido_id, estado='entregado')
 
+            # Registrar la entrada
+            movimiento = MovimientoInventario.objects.create(
+                producto_id=pedido.producto_id,
+                tipo='entrada',
+                cantidad=pedido.cantidad,
+                fecha=now(),
+                sucursal_id=1,  # Cambiar a la sucursal correspondiente
+                pedido=pedido
+            )
+
+            return JsonResponse({
+                'mensaje': f'Entrada registrada exitosamente para el pedido {pedido_id}.',
+                'movimiento_id': movimiento.id
+            }, status=201)
+
+        except Pedido.DoesNotExist:
+            return JsonResponse({'error': 'El pedido no existe o no está marcado como entregado.'}, status=404)
         except Exception as e:
-            print(f"Error al eliminar el producto: {e}")
-            return JsonResponse({'error': 'Error al eliminar el producto'}, status=500)
-    else:
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
 
+@login_required
+def ver_productos(request):
+    # Agregar logs de depuración
+    print(f"Usuario actual: {request.user.username}")
+    print(f"Grupos del usuario: {[group.name for group in request.user.groups.all()]}")
+    
+    # Verificar si el usuario pertenece al grupo Administrador
+    if not request.user.groups.filter(name="Administrador").exists():
+        print("Redirigiendo a /pos/ - No es administrador")
+        return redirect('/pos/')
+    
+    print("Cargando página de productos - Es administrador")
+    return render(request, 'inventory/ver_productos.html')
 
-
-
-
-
-from .models import Producto, Almacen  
-
-def product_form(request):
-    almacenes = Almacen.objects.all() 
-    return render(request, 'inventory/product_form.html', {'almacenes': almacenes})
-
-
+@login_required
+def usuario_actual(request):
+    """
+    Retorna información sobre el usuario actual.
+    """
+    is_administrador = request.user.groups.filter(name="Administrador").exists()
+    return JsonResponse({'is_administrador': is_administrador})

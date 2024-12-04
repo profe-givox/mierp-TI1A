@@ -1,29 +1,24 @@
-from django.urls import path, include
-from .views import CustomLoginView, product_form, editar_producto, eliminar_producto, ventas, pedidos, nuevo_pedido
-from .views import editar_pedido, eliminar_pedido, ver_productos
-from . import views
+from django.urls import path
+from .views import (control_inventarios, gestion_pedidos, control_entradas_salidas, informes_analisis, ver_productos, obtener_pedidos)
+from .views import (agregar_pedido, obtener_pedidos_completo, marcar_entregado, registrar_salida, obtener_movimientos, registrar_entrada, usuario_actual)
 
 urlpatterns = [
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('productos/agregar/', product_form, name='product_form'),
-    path('productos/editar/', editar_producto, name='editar_producto'),
-    path('productos/eliminar/', eliminar_producto, name='eliminar_producto'),
-    path('productos/ventas/', ventas, name='ventas'),
-    path('productos/pedidos/', pedidos, name='pedidos'),
-    path('pedido/nuevo/', nuevo_pedido, name='nuevo_pedido'),
-    path('pedido/editar/', editar_pedido, name='editar_pedido'), 
-    path('pedido/eliminar/', eliminar_pedido, name='eliminar_pedido'),
-    path('productos/', ver_productos, name='ver_productos'),
-
-    # API endpoints
-    path('api/productos/', views.listar_productos, name='listar_productos'),
-    path('api/productos/nuevo/', views.crear_producto, name='crear_producto'),
-    path('api/productos/<int:producto_id>/actualizar/', views.actualizar_producto, name='actualizar_producto'),
-    path('api/productos/<int:producto_id>/eliminar/', views.eliminar_producto_api, name='eliminar_producto_api'),  # Cambiado el nombre aquí
+    path('control_inventarios/', control_inventarios, name='control_inventarios'),
+    path('gestion_pedidos/', gestion_pedidos, name='gestion_pedidos'),
+    path('control_entradas_salidas/', control_entradas_salidas, name='control_entradas_salidas'),
+    path('informes_analisis/', informes_analisis, name='informes_analisis'),
+    path('productos/', ver_productos, name='ver_productos'),  # Ruta para la página de productos
+    path('usuario_actual/', usuario_actual, name='usuario_actual'), 
 
 
-    path('buscar_producto/', views.buscar_producto, name='buscar_producto'),
+
+    path('agregar_pedido/', agregar_pedido, name='agregar_pedido'),
+    path('obtener_pedidos/', obtener_pedidos, name='obtener_pedidos'),  # id junto con lo que esta en pedido
+    path('obtener_pedidos_completo/', obtener_pedidos_completo, name='obtener_pedidos_completo'),
+    path('marcar_entregado/<int:pedido_id>/', marcar_entregado, name='marcar_entregado'),
+    path('registrar_salida/<int:pedido_id>/', registrar_salida, name='registrar_salida'),
+    path('obtener_movimientos/', obtener_movimientos, name='obtener_movimientos'),
+    path('registrar_entrada/<int:pedido_id>/', registrar_entrada, name='registrar_entrada'),
     
 
-    
 ]

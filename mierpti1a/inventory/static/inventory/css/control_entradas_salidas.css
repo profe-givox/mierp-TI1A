@@ -1,0 +1,48 @@
+/* Tabla */
+table {
+    margin-top: 20px;
+}
+
+table th, table td {
+    text-align: center;
+}
+
+.ver-detalles {
+    cursor: pointer;
+}
+
+.ver-detalles:hover {
+    background-color: #f9f9f9;
+}
+
+/* Botones de búsqueda y resetear */
+#search-button,
+#reset-button {
+    margin-top: 10px;
+    background-color: #007bff; /* Azul para igualar a "Buscar" */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#search-button:hover,
+#reset-button:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el cursor */
+}
+
+#search-button:active,
+#reset-button:active {
+    background-color: #003f7f; /* Azul aún más oscuro al hacer clic */
+}
+
+/* Centrar los elementos del formulario */
+form.d-flex {
+    justify-content: center;
+}
+
+form input#search-input {
+    max-width: 400px;
+}

@@ -1,3 +1,5 @@
+<!-- shipments/templates/shipments/order_list.html -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -22,6 +24,39 @@
         .navbar a:hover {
             background-color: #f79400;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #FF9900;
+            color: white;
+        }
+        a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+        .btn-details {
+            background-color: #0073e6;
+            color: white;
+        }
+        .btn-change-status {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-cancel {
+            background-color: #f44336;
+            color: white;
+        }
     </style>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
@@ -29,6 +64,7 @@
     <!-- Barra de navegación -->
     <div class="navbar">
         <a href="{% url 'shipments:order_create' %}">Crear Pedido</a>
+        <a href="{% url 'catalogo' %}">Volver al Catálogo</a>
         {% if user.is_superuser %}
             <a href="{% url 'shipments:agregar_sucursal' %}">Agregar Sucursal</a>
             <a href="{% url 'shipments:listar_sucursales' %}">Ver Sucursales</a>
@@ -37,35 +73,48 @@
 
     <h1 style="text-align: center; color: #FF9900;">Gestión de Pedidos</h1>
 
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <!-- Tabla de pedidos -->
-    <table style="width: 100%; border-collapse: collapse; background-color: white;">
+    <table>
         <thead>
-            <tr style="background-color: #FF9900; color: white;">
-                <th style="padding: 10px; border: 1px solid #ddd;">Producto</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Cantidad</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Estado</th>
-                {% if user.is_superuser %}<th style="padding: 10px; border: 1px solid #ddd;">Dueño</th>{% endif %}
-                <th style="padding: 10px; border: 1px solid #ddd;">Acciones</th>
+            <tr>
+                <th>Orden</th>
+                <th>Total</th>
+                <th>Estado</th>
+                {% if user.is_superuser %}<th>ID del Cliente</th>{% endif %}
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            {% for order in orders %}
+            {% for orden in ordenes %}
             <tr>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.product }}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.quantity }}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.get_status_display }}</td>
+                <td>Orden #{{ orden.id }}</td>
+                <td>${{ orden.total }}</td>
+                <td>{{ orden.get_status_display }}</td>
                 {% if user.is_superuser %}
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ order.user.username }}</td>
+                <td>{{ orden.cliente_id }}</td>
                 {% endif %}
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
-                    <a href="{% url 'shipments:order_detail' order.id %}" 
-                       style="background-color: #0073e6; color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px; margin-right: 5px;">
-                       Ver Detalles
-                    </a>
-                    <a href="{% url 'shipments:order_edit' order.id %}" 
-                       style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;">
-                       Editar
-                    </a>
+                <td>
+                    <!-- Botón para ver detalles -->
+                    <a href="{% url 'shipments:order_detail' orden.id %}" class="btn-details">Ver Detalles</a>
+                    
+                    <!-- Botón para cambiar estado (solo admins) -->
+                    {% if user.is_superuser %}
+                        <a href="{% url 'shipments:change_order_status' orden.id %}" class="btn-change-status">Cambiar Estado</a>
+                    {% endif %}
+                    
+                    <!-- Botón para cancelar pedido -->
+                    {% if user.is_superuser or orden.status == 'PENDIENTE' %}
+                        <a href="{% url 'shipments:cancel_order' orden.id %}" class="btn-cancel">Cancelar</a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

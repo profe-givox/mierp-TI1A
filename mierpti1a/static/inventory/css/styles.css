@@ -1,0 +1,104 @@
+/* Estilos generales para el cuerpo */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* Títulos */
+h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Navegación de pestañas */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    gap: 0.5rem;
+}
+
+.tabs a {
+    padding: 0.6rem 1.5rem;
+    border: 1px solid #ccc;
+    background-color: #e0e0e0;
+    color: black;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.tabs a.active {
+    background-color: #5c6bc0;
+    color: white;
+}
+
+.tabs a:hover {
+    background-color: #3949ab;
+    color: white;
+}
+
+/* Tabla de datos */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 0.8rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+th {
+    background-color: #e0e0e0;
+}
+
+/* Botones */
+.btn {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-success {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #4cae4c;
+}
+
+.btn-primary {
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #3949ab;
+}

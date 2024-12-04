@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'ecar',
     'payments',
     'corsheaders',
+    'csp'
+
 ]
 
 MIDDLEWARE = [
@@ -58,11 +60,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+    "https://0ac6-2806-370-6016-ed82-7448-1d08-1d3e-510f.ngrok-free.app",
+    "http://localhost",
+    "http://127.0.0.1"
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://0ac6-2806-370-6016-ed82-7448-1d08-1d3e-510f.ngrok-free.app',
 ]
 
 ROOT_URLCONF = 'mierpti1a.urls'
@@ -137,15 +146,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "ecar",  # Agrega la ruta de la carpeta que contiene los estáticos
-    BASE_DIR / "static",
-    BASE_DIR / "inventory/static",
-    BASE_DIR / "media/pos/static",
+    #
+    os.path.join(BASE_DIR, 'ecar/static'),  # Agrega la ruta de la carpeta que contiene los estáticos
+    os.path.join(BASE_DIR, 'inventory/static'),
+    os.path.join(BASE_DIR, 'media/pos/static'),
+    os.path.join(BASE_DIR, 'pos/static'),
+    os.path.join(BASE_DIR, 'RRHH/static'),
+    os.path.join(BASE_DIR, 'payments/static'),
+    #os.path.join(BASE_DIR, 'mierpti1a/static')
 ]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATIC_ROOT =os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -160,6 +173,9 @@ LOGIN_REDIRECT_URL = '/ecar/catalogo/'
 LOGIN_URL = '/ecar/login/'
 
 
-LOGIN_REDIRECT_URL = '/shipments/orders/'
+#LOGIN_REDIRECT_URL = '/shipments/orders/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
+CSP_DEFAULT_SRC=["'self'"]
+CSP_SCRIPT_SRC=["'self'"]
+CSP_STYLE_SRC=["'self'"]
