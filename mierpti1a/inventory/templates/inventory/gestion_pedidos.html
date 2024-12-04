@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pedidos</title>
+    {% load static %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'inventory/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'inventory/css/gestion_pedidos.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Gestión de Pedidos</h2>
+        <div class="tabs">
+            <a href="{% url 'ver_productos' %}">Control de Inventarios</a>
+            <a href="{% url 'gestion_pedidos' %}" class="active">Gestión de Pedidos</a>
+            <a href="{% url 'control_entradas_salidas' %}">Control de Entradas y Salidas</a>
+            <a href="{% url 'informes_analisis' %}">Informes y Análisis</a>
+        </div>
+    
+        <!-- Filtro y barra de búsqueda -->
+        <form class="d-flex align-items-center mt-3 mb-3">
+            <label for="estado-filter" class="form-label me-2">Filtrar:</label>
+            <select id="estado-filter" class="form-select me-3 w-auto">
+                <option value="todos" selected>Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="entregado">Entregados</option>
+                <option value="falta-enviar">Faltan por enviar a la sucursal</option>
+                <option value="enviados">Ya enviados a la sucursal</option>
+            </select>
+        
+            <input type="text" id="search-input" class="form-control me-3" placeholder="Buscar por código o nombre del producto..." required>
+            <button id="search-button" class="btn btn-primary" type="submit">Buscar</button>
+            <button id="reset-button" class="btn btn-primary ms-2" type="button">Resetear</button>
+        </form>
+        
+        
+        
+    
+        <!-- Tabla de pedidos -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID Pedido</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Fecha de Pedido</th>
+                    <th>Estado</th>
+                    <th>Marcar como Entregado</th>
+                    <th>Mandar a Sucursal</th>
+                </tr>
+            </thead>
+            <tbody id="pedidos-list">
+                <!-- Aquí se insertarán las filas dinámicamente -->
+            </tbody>
+        </table>
+        </table>
+    </div>
+    
+
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmacionModal" tabindex="-1" aria-labelledby="confirmacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmacionModalLabel">Confirmar Entrega</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmacionTexto">¿Estás seguro de que el pedido ya ha sido entregado?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success confirmar-entregado">Sí, confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para mandar a sucursal -->
+    <div class="modal fade" id="mandarSucursalModal" tabindex="-1" aria-labelledby="mandarSucursalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mandarSucursalModalLabel">Mandar a Sucursal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="sucursalTexto">¿Estás seguro de que deseas mandar el producto a la sucursal con ID <span id="sucursalId"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary confirmar-mandar">Sí, mandar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enlace al archivo JavaScript -->
+    <script src="{% static 'inventory/js/gestion_pedidos.js' %}"></script>
+</body>
+</html>

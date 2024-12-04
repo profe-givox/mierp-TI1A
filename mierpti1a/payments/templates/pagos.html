@@ -16,12 +16,12 @@
         <form id="paymentForm">
             {% csrf_token %}
             <!-- Campo oculto para el ID del cliente -->
-            <input type="text" id="clientId" name="clientId" class="hidden" value="12345">
+            <input type="text" id="clientId" name="clientId" class="hidden" value="{{ user.id }}">
 
             <!-- Campo para el monto -->
             <div class="mb-3">
                 <label for="amount" class="form-label">Monto</label>
-                <input type="number" class="form-control" id="amount" name="amount" required>
+                <input type="number" class="form-control" id="amount" name="amount" value="{{ amount }}" required readonly >
             </div>
 
             <!-- Selección del tipo de pago -->
@@ -75,7 +75,7 @@
                     <input type="text" class="form-control" id="voucherNumber" name="voucherNumber">
                 </div>
             </div>
-
+            <button id="btnVolver"  class="btn btn-outline-secondary">Volver</button>
             <button type="submit" class="btn btn-primary">Enviar</button>
         </form>
     </div>

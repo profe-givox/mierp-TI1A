@@ -1,0 +1,13 @@
+/* Espaciado entre gráficos */
+canvas {
+    margin-bottom: 20px;
+}
+
+/* Centrar el selector de filtros */
+form.d-flex {
+    justify-content: center;
+}
+
+form select#tipo-reporte {
+    max-width: 200px;
+}

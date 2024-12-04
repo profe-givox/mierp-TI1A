@@ -56,12 +56,12 @@ def verificar_acceso(view_func):
             return view_func(request, *args, **kwargs)
 
         # Permisos para "Caja"
-        if puesto == "Caja" and vista in ["venta"]:
+        if puesto == "Caja" and vista in ["venta","realizar_venta"]:
             print("Debug: Acceso permitido para empleado de Caja.")
             return view_func(request, *args, **kwargs)
 
         # Permisos para "Administrador"
-        if puesto == "Administrador" and vista in ["ventasRealizadas", "productos"]:
+        if puesto == "Administrador" and vista in ["ventasRealizadas", "productos","realizar_venta"]:
             print("Debug: Acceso permitido para Administrador.")
             return view_func(request, *args, **kwargs)
 
@@ -325,7 +325,7 @@ def get_ventasRealizadas(request, sucuarsalid):
     else:
         return JsonResponse({'error': 'Método no permitido.'}, status=405)
     
-@csrf_exempt
+@verificar_acceso
 def realizar_venta(request):
     if request.method == 'POST':
         try:

@@ -9,5 +9,6 @@ urlpatterns = [
     path('pagosCliente/', views.pagosClientes, name = 'pagosClientes'),
     path('api/pagos-por-cliente/', views.api_pagos_por_cliente, name='api_pagos_por_cliente'),
 
-
+    path('generarPedido/', views.generarPedido,  name='generarPedido'),
+    path('succesful/', views.pagoExitoso, name='mostrar_html'),
 ]

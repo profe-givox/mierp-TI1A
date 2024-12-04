@@ -1,0 +1,105 @@
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap; /* Permite que en pantallas pequeñas, el contenido se ajuste hacia abajo */
+}
+
+.main-content {
+    width: 30%; 
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, .3);
+    margin: 2em 1em;
+    background-color: #4CAF50;
+    padding: 1.5em;
+    position: relative;
+    top: 1em;
+    left: 1em;
+}
+
+
+.login_form {
+    background-color: #fff;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1em;
+    height: auto;
+}
+.employee-slots {
+    width: 60%; /* Para que ocupe el mismo ancho que el formulario */
+    padding: 1.5em;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    text-align: left;
+}
+
+/* Las cajas de los slots permanecen como estaban, con tamaño y estilo definido */
+.slot {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #ddd;
+    display: inline-block;
+    background-color: #fff;
+    text-align: center;
+    line-height: 100px;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+.form__input {
+    width: 100%;
+    border: 1px solid #aaa;
+    border-radius: 50px;
+    padding: 1em 1.5em;
+    margin: 1em 0;
+    outline: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.form__input:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(0,80,80,0.5);
+}
+
+.btn-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.btn {
+    width: 48%;
+    border-radius: 50px;
+    color: #fff;
+    background: linear-gradient(to right, #4CAF50, #81C784);
+    border: none;
+    padding: 1em;
+    margin: 1em 0;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn:hover, .btn:focus {
+    background: linear-gradient(to right, #388E3C, #66BB6A);
+}
+
+h2 {
+    color: #000;
+    margin-bottom: 1.5em;
+    font-size: 1.8em;
+}
+
+

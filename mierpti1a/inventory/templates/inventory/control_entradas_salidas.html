@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Entradas y Salidas</title>
+    {% load static %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'inventory/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'inventory/css/control_entradas_salidas.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+
+    <div class="container">
+        <h2>Control de Entradas y Salidas</h2>
+        <div class="tabs">
+            <a href="{% url 'ver_productos' %}">Control de Inventarios</a>
+            <a href="{% url 'gestion_pedidos' %}">Gestión de Pedidos</a>
+            <a href="{% url 'control_entradas_salidas' %}" class="active">Control de Entradas y Salidas</a>
+            <a href="{% url 'informes_analisis' %}">Informes y Análisis</a>
+        </div>
+
+        <!-- Filtro para búsqueda -->
+        <form class="d-flex mb-4 align-items-center justify-content-center" id="search-form">
+            <input type="text" id="search-input" class="form-control me-2" placeholder="Buscar por código o nombre del producto..." required>
+            <select id="tipo-filtro" class="form-select me-2" required>
+                <option value="todo" selected>Todo</option>
+                <option value="entrada">Entradas</option>
+                <option value="salida">Salidas</option>
+            </select>
+            <button id="search-button" class="btn btn-primary" type="submit">Buscar</button>
+            <button type="button" id="reset-button" class="btn btn-secondary ms-2">Resetear</button>
+        </form>
+
+        <!-- Tabla de movimientos -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID Movimiento</th>
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                    <th>Sucursal (ID)</th>
+                </tr>
+            </thead>
+            <tbody id="movimientos-list">
+                <!-- Se llenará dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+
+        <!-- Modal para detalles del movimiento -->
+        <div class="modal fade" id="detallesMovimientoModal" tabindex="-1" aria-labelledby="detallesMovimientoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detallesMovimientoModalLabel">Detalles del Movimiento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Producto:</strong> <span id="detalle-producto"></span></p>
+                        <p><strong>Tipo de Movimiento:</strong> <span id="detalle-tipo"></span></p>
+                        <p><strong>Cantidad:</strong> <span id="detalle-cantidad"></span></p>
+                        <p><strong>Fecha:</strong> <span id="detalle-fecha"></span></p>
+                        <p><strong>Sucursal:</strong> <span id="detalle-sucursal"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para Toasts -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Enlace al archivo JavaScript -->
+    <script src="{% static 'inventory/js/control_entradas_salidas.js' %}"></script>
+</body>
+</html>

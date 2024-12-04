@@ -29,7 +29,7 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),   
     path('RRHH/', include('RRHH.urls')),
     path('pos/', include('pos.urls')),
-    path('crm/', include('crm.urls')),
+    path('crm', include('crm.urls')),
     path('inventory/', include('inventory.urls')),
     path('ecar/', include('ecar.urls')), 
     path('payments/' , include('payments.urls')),
